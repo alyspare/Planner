@@ -1,0 +1,66 @@
+PERSONAL PLANNER - START HERE
+=============================
+
+This planner is yours. It is a plain web page, so it keeps working no matter
+what apps or subscriptions you use. Your entries are saved inside the browser
+on each device and are never uploaded anywhere.
+
+DESKTOP (Mac or PC)
+  Double-click index.html. It opens in your browser and works offline.
+  Bookmark it so you always open the same file in the same browser.
+
+IPHONE AND IPAD
+  iPhone/iPad can't run a web page straight from the Files app, so put this
+  folder on a free web host once. Easiest way, from your computer:
+    1. Unzip the kit, go to app.netlify.com/drop and drag the whole
+       Personal-Planner folder onto the page. You get a web address.
+    2. Make the free account it offers right away. Sites that aren't
+       claimed with an account are deleted after about an hour.
+  Then on your iPhone and iPad:
+    3. Open that web address in Safari.
+    4. Tap Share, then Add to Home Screen.
+    5. Open it from the Home Screen icon. From then on it works with no
+       internet, like an app.
+  (Any free static host works too, such as GitHub Pages.)
+  Only the empty planner lives on the host. Your entries stay on your device.
+
+SYNC ACROSS DEVICES (automatic)
+  Backup > Sync across devices. One time:
+    1. Tap Make a GitHub key. On GitHub set Expiration to No expiration,
+       leave only "gist" checked, tap Generate token and copy the key.
+    2. Paste the key, choose a passphrase (8+ characters), tap Turn on sync,
+       type the passphrase again, tap Start syncing.
+  On every other device: open the planner's web address, Backup, paste the
+  same key and passphrase, Turn on sync. Choose "Use the synced planner"
+  if it asks. Entries are locked with your passphrase before they leave the
+  device. Keep the key and passphrase in your Passwords app.
+  Turn it off any time: Backup > Turn off on this device.
+
+MOVING ENTRIES BY HAND (backup files)
+  Each device keeps its own copy. To move entries without sync:
+    1. On the device with your newest entries: Backup > Export backup.
+    2. Save the file to iCloud Drive (or AirDrop / email it).
+    3. On the other device: Backup > Restore from backup > pick the file.
+  Restoring replaces what is on that device.
+
+DALLAS WEATHER
+  Weather fills in on its own whenever the planner is open with internet:
+  past days back to 2023, plus about two weeks ahead. It stays saved, so it
+  still shows offline. Open any day to type your own instead.
+
+CONTENT CALENDAR
+  In your Content Planner (in Claude) tap Send to Personal Planner, then
+  Copy posts. In this planner go to Content Related > Sync Content Calendar
+  > Paste from clipboard. Do it again whenever you want it to catch up.
+
+GETTING AROUND
+  On iPhone and iPad, swipe left or right anywhere on a page to move to the
+  next or previous page.
+
+STARTING CLEAN
+  To clear test entries: Backup > Erase everything on this device (tap it
+  twice). Do this on each device where you tried things out.
+
+BACK UP REGULARLY
+  Clearing your browser's website data deletes entries on that device.
+  Export a backup every week or two and keep it in iCloud Drive.
