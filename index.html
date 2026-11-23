@@ -385,6 +385,9 @@ a.btn{text-decoration:none}
 .sm-big{display:flex;align-items:baseline;gap:8px}
 .sm-big b{font-size:32px;letter-spacing:-.03em;font-variant-numeric:tabular-nums;line-height:1}
 .sm-big span{color:var(--muted);font-size:13px}
+.dz-grid-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 2px 10px;color:var(--on-bg)}
+.dz-grid-head .eyebrow{margin:0;opacity:1}
+.dz-grid-head span{font-size:13px;opacity:.82}
 .sm-stats{list-style:none;margin:0;padding:0;display:grid;gap:5px;font-size:13px}
 .sm-stats li{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:5px}
 .sm-stats b{font-variant-numeric:tabular-nums;text-align:right}
@@ -2534,49 +2537,50 @@ function dzNewSection(){
     '<button type="submit" class="btn primary">New entry</button></form>' +
     '<p class="hint">Pick the date and who it involves. The entry opens so you can rate it and add the details.</p></section>';
 }
-function dzCard(p, P, prv){
-  var t = today(), cap = P.end < t ? P.end : t, all = dzEntriesFor(p.id), inP = all.filter(function(e){ return e.date >= P.start && e.date <= P.end; }).sort(byDate);
-  var first = all.map(function(e){ return e.date; }).sort()[0] || '', known = validISO(p.met) ? p.met : first;
+function dzCard(p){
+  /* person cards cover all time; the period buttons only drive the calendar and entry list */
+  var t = today(), all = dzEntriesFor(p.id).sort(byDate), past = all.filter(function(e){ return e.date <= t; });
+  var first = all.map(function(e){ return e.date; })[0] || '', known = validISO(p.met) ? p.met : first;
   var ks;
   if(p.misc) ks = 'Various';
   else if(!known) ks = '<button type="button" class="dz-link" data-act="dz-person" data-pid="' + esc(p.id) + '">Add date</button>';
   else if(known > t) ks = fmtShort(known);
   else ks = esc(dzDur(known, t)) + '<small>since ' + MON[parse(known).m-1] + ' ' + parse(known).y + '</small>';
-  var ip = inP.filter(dzInPerson).length;
-  var from = known && !p.misc && known > P.start ? known : P.start, days = cap >= from ? daysBetween(from, cap) + 1 : 0;
-  var touches = inP.filter(function(e){ return e.date <= cap; }).reduce(function(a, e){ return a + dzTouches(e); }, 0);
-  var avg = days ? touches / days : null;
-  var lav = dzAvg(inP, 'likeness'), pav = dzAvg(all.filter(function(e){ return e.date >= prv[0] && e.date <= prv[1]; }), 'likeness'), trend = '';
-  if(lav != null && pav != null && Math.abs(lav - pav) >= 0.3) trend = '<i class="dz-tr ' + (lav > pav ? 'up' : 'down') + '" title="' + (lav > pav ? 'Up' : 'Down') + ' from ' + pav.toFixed(1) + ' ' + esc(prv[2]) + '">' + (lav > pav ? '▲' : '▼') + '</i>';
-  var ntb = inP.filter(function(e){ return dzHas(e, 'marks', 'No Text Back'); }).length;
-  var seen = all.filter(function(e){ return e.date <= cap && dzSeen(e); }).map(function(e){ return e.date; }).sort().pop();
-  var spoken = all.filter(function(e){ return e.date <= cap && (dzTouches(e) > 0 || dzHas(e, 'marks', 'Last Time Spoken')); }).map(function(e){ return e.date; }).sort().pop();
+  var ip = past.filter(dzInPerson).length;
+  /* daily average runs from when tracking began (first entry, or the day you met if later) to today */
+  var pf = past.length ? past[0].date : '', from = pf && validISO(p.met) && !p.misc && p.met > pf ? p.met : pf, days = from && t >= from ? daysBetween(from, t) + 1 : 0;
+  var touches = past.reduce(function(a, e){ return a + dzTouches(e); }, 0), avg = days ? touches / days : null;
+  var lav = dzAvg(past, 'likeness'), cut = addDays(t, -29), rav = dzAvg(past.filter(function(e){ return e.date >= cut; }), 'likeness'), bav = dzAvg(past.filter(function(e){ return e.date < cut; }), 'likeness'), trend = '';
+  if(rav != null && bav != null && Math.abs(rav - bav) >= 0.3) trend = '<i class="dz-tr ' + (rav > bav ? 'up' : 'down') + '" title="Last 30 days ' + rav.toFixed(1) + ' vs ' + bav.toFixed(1) + ' before">' + (rav > bav ? '▲' : '▼') + '</i>';
+  var ntb = past.filter(function(e){ return dzHas(e, 'marks', 'No Text Back'); }).length;
+  var seen = past.filter(dzSeen).map(function(e){ return e.date; }).pop();
+  var spoken = past.filter(function(e){ return dzTouches(e) > 0 || dzHas(e, 'marks', 'Last Time Spoken'); }).map(function(e){ return e.date; }).pop();
   var stats = [
     ['Known since', ks],
     ['In-person interactions', String(ip)],
-    ['Daily communication avg', avg == null ? '—' : (avg >= 10 ? Math.round(avg) : avg.toFixed(1)) + '<small>/ day</small>'],
+    ['Daily communication avg', avg == null ? '—' : (avg >= 10 ? Math.round(avg) : avg > 0 && avg < 0.1 ? avg.toFixed(2) : avg.toFixed(1)) + '<small>/ day</small>'],
     ['Average likeness', lav == null ? '—' : trend + lav.toFixed(1) + '<small>/10</small>'],
     ['No texts back', String(ntb)],
     ['Last time seen', seen ? fmtShort(seen) + '<small>' + dzAgo(seen, t) + '</small>' : '—']
   ];
-  var note = [], lf = inP.filter(function(e){ return (e.feelings || []).length; }).pop();
+  var note = [], lf = past.filter(function(e){ return (e.feelings || []).length; }).pop();
   if(lf) note.push('Feeling ' + lf.feelings.map(function(f){ var x = DZ_FEEL.filter(function(q){ return q[0] === f; })[0]; return x ? x[1] : ''; }).join('') + ' on ' + fmtShort(lf.date));
-  var ov = dzAvg(inP, 'overall'); if(ov != null) note.push('Interactions avg ' + ov.toFixed(1) + '/10');
+  var ov = dzAvg(past, 'overall'); if(ov != null) note.push('Interactions avg ' + ov.toFixed(1) + '/10');
   if(spoken) note.push('Last spoke ' + fmtShort(spoken));
-  var rec = inP.filter(function(e){ return e.recurring; }).length; if(rec) note.push('<span class="dz-warn">⚠ ' + plural(rec, 'recurring issue') + '</span>');
-  if(!inP.length) note.unshift('No entries in this period');
-  if(validISO(p.bday)){ var bp = parse(p.bday);
-    for(var by = parse(P.start).y; by <= parse(P.end).y; by++){ var bdd = iso(by, bp.m, Math.min(bp.d, dim(by, bp.m))); if(bdd >= P.start && bdd <= P.end) note.push('🎂 Birthday ' + fmtShort(bdd)); } }
+  var rec = past.filter(function(e){ return e.recurring; }).length; if(rec) note.push('<span class="dz-warn">⚠ ' + plural(rec, 'recurring issue') + '</span>');
+  var up = all.length - past.length; if(up) note.push(up + (up === 1 ? ' upcoming entry' : ' upcoming entries'));
+  if(!all.length) note.unshift('No entries yet');
+  if(validISO(p.bday)){ var nb = dzNextBday(p.bday, t), nd = daysBetween(t, nb); if(nd <= 30) note.push('🎂 Birthday ' + fmtShort(nb) + (nd === 0 ? ' · today' : ' · in ' + plural(nd, 'day'))); }
   return '<article class="card sm-card dz-card" data-pid="' + esc(p.id) + '" style="border-top-color:' + (p.color || 'var(--dating-mid)') + '"><div class="sm-head">' +
     '<button type="button" class="dz-grip" data-pid="' + esc(p.id) + '" aria-label="Move ' + esc(p.ini || 'person') + '. Drag, or use the arrow keys." title="Drag to move"><svg viewBox="0 0 10 16" aria-hidden="true"><g fill="currentColor"><circle cx="2.5" cy="2.5" r="1.5"/><circle cx="7.5" cy="2.5" r="1.5"/><circle cx="2.5" cy="8" r="1.5"/><circle cx="7.5" cy="8" r="1.5"/><circle cx="2.5" cy="13.5" r="1.5"/><circle cx="7.5" cy="13.5" r="1.5"/></g></svg></button>' +
     dzPIcon(p) + '<h3>' + esc(p.ini || '?') + (p.name ? ' <span class="dz-name">' + esc(p.name) + '</span>' : '') + '</h3>' +
       '<button type="button" class="btn sm dz-edit" data-act="dz-person" data-pid="' + esc(p.id) + '" aria-label="Edit ' + esc(p.ini || 'person') + '">Edit</button></div>' +
-    '<div class="sm-big"><b>' + inP.length + '</b><span>' + (inP.length === 1 ? 'entry' : 'entries') + '</span></div>' +
+    '<div class="sm-big"><b>' + all.length + '</b><span>' + (all.length === 1 ? 'entry' : 'entries') + ' · all time</span></div>' +
     '<ul class="sm-stats">' + stats.map(function(x){ return '<li><span>' + x[0] + '</span><b>' + x[1] + '</b></li>'; }).join('') + '</ul>' +
     '<p class="sm-note">' + note.join(' · ') + '</p></article>';
 }
 function datingBoard(){
-  var pg = 'dating', st = tbState(pg), P = tbPeriod(pg), t = today(), prv = dzPrev(P);
+  var pg = 'dating', st = tbState(pg), P = tbPeriod(pg), t = today();
   var map = collect(P.start, P.end, false), byD = {}, entries = [];
   Object.keys(map).forEach(function(d){ map[d].forEach(function(e){ if(e.it.kind !== 'dentry') return; (byD[d] || (byD[d] = [])).push(e); entries.push(e); }); });
   entries.sort(eSort);
@@ -2586,9 +2590,10 @@ function datingBoard(){
   var all = '<div class="tb-grid"><article class="card sm-card tb-box all" style="border-top-color:var(--dating-mid)"><div class="sm-head">' + catIcon('dating') + '<h3>All dating entries</h3><span class="tb-n">' + entries.length + '</span></div>' +
     (entries.length ? '<ul class="tb-list">' + entries.map(tbEntry).join('') + '</ul>' : '<p class="empty" style="padding:2px 0">No dating entries ' + (P.t === 'day' ? 'on this day' : 'in this period') + ' yet.</p>') + '</article></div>';
   return '<header class="page-head sub-hero" id="tb-dating"><p class="eyebrow">' + esc(P.label) + '</p><h1>Dating <span class="hl">Breakdown</span></h1>' +
-      '<p class="sub">How each connection is going for the period you choose.</p><div class="sum-ctl tb-ctl">' + seg + nav + '</div></header>' +
+      '<p class="sub">The calendar and entry list follow the period you choose. Each person\'s card covers all time.</p><div class="sum-ctl tb-ctl">' + seg + nav + '</div></header>' +
     tbPreview(pg, P, byD) + all +
-    '<div class="sm-grid dz-grid">' + S.dating.people.map(function(p){ return dzCard(p, P, prv); }).join('') +
+    '<div class="dz-grid-head"><p class="eyebrow">Profiles</p><span>All time · every entry, start to today</span></div>' +
+    '<div class="sm-grid dz-grid">' + S.dating.people.map(function(p){ return dzCard(p); }).join('') +
       '<article class="card sm-card dz-addp"><div class="sm-head"><h3>Add someone</h3></div><form class="dz-padd" data-form="dz-padd"><input class="ctl" name="ini" placeholder="Initials" maxlength="8" autocomplete="off" data-k="dz:padd" aria-label="Initials" enterkeyhint="done"><button class="btn" type="submit">Add</button></form>' +
       '<p class="sm-note">Each person gets a box here and a chip in every entry. Only initials show on the calendar.</p></article></div>';
 }
