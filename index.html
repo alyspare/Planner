@@ -3611,6 +3611,7 @@ async function syncNow(){
     } else if(syChanged(syPayload(S), SYS.base)){
       await syWrite(syPayload(S));
     }
+    await cpFromGist(g);
     SYS.last = Date.now(); SYS.err = ''; sySave(); syState('ok');
   } catch(e){
     if(e && (e.code === 'offline' || e.code === 'network')) syState('offline');
@@ -3708,6 +3709,30 @@ function sySection(){
     '<p class="hint sy-msg' + (F.bad ? ' sy-bad' : '') + '" id="sy-msg" role="status">' + esc(F.msg || '') + '</p>' +
     '<p class="hint">Save the key and passphrase in your Passwords app. If the passphrase is lost, the synced copy can’t be unlocked (this device’s entries stay safe).</p></section>';
 }
+/* ---------- Content Planner: posts come in automatically (same site and same sync) ---------- */
+var CP_SHARE = 'contentPlanner.share.v1', CP_FILE = 'content-planner-sync.json';
+function cpTake(obj){
+  try {
+    if(!obj || obj.app !== 'blyssful-content-planner') return false;
+    var c = parseContent(JSON.stringify(obj)), cur = S.content || {};
+    if(cur.synced && !(new Date(c.synced) > new Date(cur.synced))) return false;
+    S.content = c; save(); render(); if(D.mode === 'csync') drawCSync();
+    return true;
+  } catch(e){ return false; }
+}
+function cpFromLocal(){ try { var t = localStorage.getItem(CP_SHARE); if(t) cpTake(JSON.parse(t)); } catch(e){} }
+async function cpFromGist(g){
+  try {
+    var f = g && g.files && g.files[CP_FILE]; if(!f) return;
+    var txt = f.content;
+    if(f.truncated && f.raw_url){ var rr = await fetch(f.raw_url + (f.raw_url.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now()); txt = await rr.text(); }
+    var o = JSON.parse(txt); if(!o || o.app !== 'content-planner-sync' || !o.data) return;
+    var p = await syDecrypt(SYS.key, o); if(p && p.share) cpTake(p.share);
+  } catch(e){}
+}
+cpFromLocal();
+window.addEventListener('storage', function(e){ if(e.key === CP_SHARE) cpFromLocal(); });
+document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') cpFromLocal(); });
 window.SY_READY = true;
 window.addEventListener('online', function(){ if(SYS.on) syncNow(); });
 window.addEventListener('offline', function(){ if(SYS.on) syState('offline'); });

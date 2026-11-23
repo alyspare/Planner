@@ -1,5 +1,5 @@
 // Keeps the planner working with no internet once it has been opened once.
-const CACHE = 'personal-planner-v3';
+const CACHE = 'personal-planner-v4';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
