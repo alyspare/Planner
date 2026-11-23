@@ -994,6 +994,19 @@ main.sw-r{animation:swInR .24s ease-out}
 .dz-sw.custom input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 .dz-sw.custom input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
 .dz-sum-meta{margin:0 0 8px;font-size:12px;color:var(--muted)}
+.dz-entsec h3 span{font-weight:600;color:var(--muted);font-size:12px;margin-left:4px}
+.dz-elist{list-style:none;margin:0;padding:0}
+.dz-elist li+li{border-top:1px solid var(--line)}
+.dz-erow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px 2px;background:none;border:0;text-align:left;cursor:pointer;font:inherit;color:inherit;border-radius:8px}
+.dz-erow:hover .dz-et{text-decoration:underline;text-underline-offset:2px}
+.dz-erow:focus-visible{outline:2px solid var(--dating-mid);outline-offset:2px}
+.dz-eb{min-width:0}
+.dz-et{display:block;font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dz-em{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.dz-ed{color:var(--muted);font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dz-eyear{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}
+.dz-eyear:first-child{margin-top:0}
+.dz-left{margin:4px 0 0}
 .dz-sum{padding:12px 14px;border-radius:12px;background:var(--wash);font-size:14px;line-height:1.6}
 .dz-sum p{margin:0}
 .dz-themes{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-top:10px !important;font-size:12.5px}
@@ -1373,7 +1386,7 @@ function normalize(d){
     if(it.kind === 'income'){ if(!it.received || typeof it.received !== 'object') it.received = {}; it.source = it.source || 'General'; if(it.recurring !== 'no') it.recurring = 'yes'; it.freq = it.freq || 'biweekly'; }
     if(it.kind === 'debt'){ if(!it.paid || typeof it.paid !== 'object') it.paid = {}; it.freq = it.freq || 'monthly'; it.recurring = 'yes'; }
     if(it.kind === 'person') it.logs = Array.isArray(it.logs) ? it.logs.filter(function(l){ return l && validISO(l.date); }) : [];
-    if(it.kind === 'dentry'){ ['who','types','marks','feelings'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.recurring = !!x.recurring; it.issue = String(x.issue || ''); it.overall = String(x.overall || ''); it.likeness = String(x.likeness || ''); }
+    if(it.kind === 'dentry'){ ['who','types','marks','feelings'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.recurring = !!x.recurring; it.issue = String(x.issue || ''); it.overall = String(x.overall || ''); it.likeness = String(x.likeness || ''); it.stayed = !!x.stayed; it.left = validISO(x.left) ? x.left : ''; }
     return it;
   });
   s.habits = Array.isArray(d.habits) ? d.habits.filter(function(h){ return h && h.id; }) : [];
@@ -1462,7 +1475,7 @@ function newItem(kind, props){
   if(kind === 'debt'){ it.balance = m2(it.balance); it.original = it.original ? m2(it.original) : it.balance; it.minPay = m2(it.minPay); it.apr = String(it.apr || '').trim() ? String(num(it.apr)) : ''; it.dtype = it.dtype || 'Credit card'; it.recurring = 'yes'; it.freq = it.freq || 'monthly'; it.paid = {}; it.end = ''; }
   if(kind === 'event'){ it.cat = it.cat || 'self'; it.end = ''; it.time = ''; }
   if(kind === 'person'){ it.group = it.group || 'Friends'; it.rhythm = it.rhythm || '30'; it.birthday = it.birthday || ''; it.contact = ''; it.logs = []; }
-  if(kind === 'dentry'){ it.who = Array.isArray(it.who) ? it.who : []; it.types = []; it.marks = []; it.feelings = []; it.overall = ''; it.likeness = ''; it.recurring = false; it.issue = ''; }
+  if(kind === 'dentry'){ it.who = Array.isArray(it.who) ? it.who : []; it.types = []; it.marks = []; it.feelings = []; it.overall = ''; it.likeness = ''; it.recurring = false; it.issue = ''; it.stayed = false; it.left = ''; }
   S.items.push(it); save();
   return it;
 }
@@ -2507,8 +2520,9 @@ function dzTitle(it){
   return (w.length ? w.join(' & ') : 'Dating') + ' · ' + what;
 }
 function dzHas(e, f, v){ return (e[f] || []).indexOf(v) >= 0; }
-function dzInPerson(e){ return !dzHas(e, 'marks', 'No Show') && (dzHas(e, 'types', 'In-Person') || (dzHas(e, 'marks', 'Date') && !(e.types || []).length)); }
+function dzInPerson(e){ return !dzHas(e, 'marks', 'No Show') && (!!e.stayed || dzHas(e, 'types', 'In-Person') || (dzHas(e, 'marks', 'Date') && !(e.types || []).length)); }
 function dzSeen(e){ return dzInPerson(e) || (dzHas(e, 'marks', 'Last Time Seen') && !dzHas(e, 'marks', 'No Show')); }
+function dzSeenDates(e){ var out = []; if(dzSeen(e)) out.push(e.date); if(e.stayed && !dzHas(e, 'marks', 'No Show') && validISO(e.left) && e.left >= e.date) out.push(e.left); return out; }
 function dzTouches(e){ return dzHas(e, 'marks', 'No Show') || dzHas(e, 'marks', 'No Text Back') ? 0 : (e.types || []).length; }
 function dzEntriesFor(pid){ return S.items.filter(function(i){ return i.kind === 'dentry' && validISO(i.date) && (i.who || []).indexOf(pid) >= 0; }); }
 function dzDur(a, b){
@@ -2553,7 +2567,7 @@ function dzCard(p){
   var lav = dzAvg(past, 'likeness'), cut = addDays(t, -29), rav = dzAvg(past.filter(function(e){ return e.date >= cut; }), 'likeness'), bav = dzAvg(past.filter(function(e){ return e.date < cut; }), 'likeness'), trend = '';
   if(rav != null && bav != null && Math.abs(rav - bav) >= 0.3) trend = '<i class="dz-tr ' + (rav > bav ? 'up' : 'down') + '" title="Last 30 days ' + rav.toFixed(1) + ' vs ' + bav.toFixed(1) + ' before">' + (rav > bav ? '▲' : '▼') + '</i>';
   var ntb = past.filter(function(e){ return dzHas(e, 'marks', 'No Text Back'); }).length;
-  var seen = past.filter(dzSeen).map(function(e){ return e.date; }).pop();
+  var seen = past.reduce(function(m, e){ dzSeenDates(e).forEach(function(d){ if(d <= t && d > m) m = d; }); return m; }, '');
   var spoken = past.filter(function(e){ return dzTouches(e) > 0 || dzHas(e, 'marks', 'Last Time Spoken'); }).map(function(e){ return e.date; }).pop();
   var stats = [
     ['Known since', ks],
@@ -3433,7 +3447,8 @@ function drawItem(){
   var sc2 = dr.querySelector('.d-scroll'); if(sc2 && prevTop) sc2.scrollTop = prevTop;
 }
 function drawDating(it, prevTop){
-  var crumb = (D.from ? '<button type="button" class="btn sm" data-act="d-back">‹ ' + fmtShort(D.from) + '</button>' : '') + '<span class="pill c-dating">Dating</span><span>Dating entry</span>';
+  var bp = D.fromP && dzPerson(D.fromP);
+  var crumb = (bp ? '<button type="button" class="btn sm" data-act="d-backp">‹ ' + esc(bp.ini || 'Back') + '</button>' : D.from ? '<button type="button" class="btn sm" data-act="d-back">‹ ' + fmtShort(D.from) + '</button>' : '') + '<span class="pill c-dating">Dating</span><span>Dating entry</span>';
   function sec(h, body, hint){ return '<section class="d-sec dz-sec"><h3>' + h + (hint ? ' <span>' + hint + '</span>' : '') + '</h3>' + body + '</section>'; }
   function chips(f, list, neg){
     var cur = it[f] || [];
@@ -3454,6 +3469,8 @@ function drawDating(it, prevTop){
     sec('Overall Scale', scale('overall', 'Rough', 'Amazing'), 'How the interaction went') +
     sec('Interaction Type', chips('types', plain(DZ_TYPES))) +
     sec('Dating Marks', chips('marks', plain(DZ_MARKS), ['No Text Back', 'No Show'])) +
+    sec('Stayed The Night', '<label class="dz-check"><input type="checkbox" class="chk" data-df="stayed"' + (it.stayed ? ' checked' : '') + '> Yes, stayed the night</label>' +
+      (it.stayed ? '<dl class="d-fields dz-left"><div><dt>Date Left</dt><dd><input type="date" class="ctl" data-df="left" value="' + esc(it.left || '') + '"' + (validISO(it.date) ? ' min="' + it.date + '"' : '') + '></dd></div></dl><p class="hint">The day he left counts as the last time you saw him.</p>' : '')) +
     sec('Current Feelings', chips('feelings', DZ_FEEL.map(function(x){ return [x[0], x[0], x[1]]; }))) +
     sec('Reoccurring Issue?', '<label class="dz-check"><input type="checkbox" class="chk" data-df="recurring"' + (it.recurring ? ' checked' : '') + '> Yes, this keeps happening</label>' +
       (it.recurring ? dtext('issue', it.issue, 'What keeps happening?') : '')) +
@@ -3478,6 +3495,27 @@ function dzTotHTML(f, n, label){
   var prev = Math.max(0, parseInt(S.dating && dzPerson(D.id) ? dzPerson(D.id)[f] : 0, 10) || 0);
   return '<span class="dz-tot" data-tot="' + f + '" data-n="' + n + '">' + (n + prev) + '</span><span class="dz-from">' + n + ' logged</span>' +
     '<label class="dz-earlier"><span>+ before the planner</span><input type="number" min="0" inputmode="numeric" class="ctl" data-dpf="' + f + '" value="' + esc(dzPerson(D.id)[f] || '') + '" placeholder="0" aria-label="' + label + ' before the planner"></label>';
+}
+function dzEntryListHTML(p){
+  var t = today(), ty = parse(t).y, list = dzEntriesFor(p.id).sort(function(a, b){ return b.date.localeCompare(a.date) || (b.created || 0) - (a.created || 0); });
+  if(!list.length) return '<p class="muted dz-sum-empty">No entries with ' + esc(p.ini || 'this person') + ' yet. Start one from New Dating Entry.</p>';
+  var years = {}; list.forEach(function(e){ years[parse(e.date).y] = 1; }); var multi = Object.keys(years).length > 1, lastY = null, h = '';
+  list.forEach(function(e){
+    var y = parse(e.date).y;
+    if(multi && y !== lastY){ if(lastY !== null) h += '</ul>'; h += '<p class="dz-eyear">' + y + '</p><ul class="dz-elist">'; lastY = y; }
+    else if(!multi && lastY === null){ h += '<ul class="dz-elist">'; lastY = y; }
+    var meta = [];
+    if(e.likeness) meta.push('♥ ' + esc(e.likeness) + '/10');
+    if(e.overall) meta.push('Overall ' + esc(e.overall) + '/10');
+    if(e.stayed) meta.push('🌙 Stayed' + (validISO(e.left) ? ' · left ' + fmtShort(e.left) : ''));
+    var fe = (e.feelings || []).map(function(f){ var x = DZ_FEEL.filter(function(q){ return q[0] === f; })[0]; return x ? x[1] : ''; }).join(''); if(fe) meta.push(fe);
+    if(e.recurring) meta.push('<span class="dz-warn">⚠ Recurring</span>');
+    if(e.date > t) meta.push('Upcoming');
+    h += '<li><button type="button" class="dz-erow" data-act="open" data-id="' + esc(e.id) + '">' + itemIcon(e, 'sm') +
+      '<span class="dz-eb"><span class="dz-et">' + esc(dzTitle(e)) + '</span>' + (meta.length ? '<span class="dz-em">' + meta.join(' · ') + '</span>' : '') + '</span>' +
+      '<span class="dz-ed">' + DOW[dowOf(e.date)].slice(0, 3) + ', ' + fmtShort(e.date) + (y !== ty && !multi ? ', ' + y : '') + '</span></button></li>';
+  });
+  return h + '</ul>';
 }
 function drawDPerson(){
   var p = dzPerson(D.id); if(!p){ closeDrawer(); return; }
@@ -3510,6 +3548,7 @@ function drawDPerson(){
     '<p class="hint">Totals count your entries marked Date, Gifts Given and Gifts Received (' + n + (n === 1 ? ' entry' : ' entries') + ' so far). Add any from before you started logging.</p>' +
     '<section class="d-sec"><h3>Notes</h3>' + area('notes', 'How you met, things to remember…', 'Notes') + '</section>' +
     '<section class="d-sec dz-sumsec"><h3>Summary</h3>' + dzSummaryHTML(p) + '</section>' +
+    '<section class="d-sec dz-entsec"><h3>All Entries <span>' + n + '</span></h3>' + dzEntryListHTML(p) + '</section>' +
     '<div class="d-foot"><button type="button" class="btn danger" data-act="dz-pdel">Delete</button><button type="button" class="btn primary" data-act="close">Done</button></div></div>';
 }
 
@@ -3688,10 +3727,13 @@ document.addEventListener('click', function(e){
   var act = t.getAttribute('data-act'), id = t.getAttribute('data-id'), inDrawer = dr.contains(t);
   if(t.tagName === 'SELECT' || (t.tagName === 'INPUT' && t.type === 'checkbox')) return; // handled on change
   switch(act){
-    case 'open': e.preventDefault(); openItem(id, inDrawer && D.mode === 'day' ? D.date : (inDrawer && D.mode === 'item' ? D.from : null)); break;
+    case 'open': e.preventDefault();
+      if(inDrawer && D.mode === 'dperson'){ var fp = D.id; openItem(id, null); D.fromP = fp; drawItem(); break; }
+      openItem(id, inDrawer && D.mode === 'day' ? D.date : (inDrawer && D.mode === 'item' ? D.from : null)); break;
     case 'day': if(e.target.closest('[data-act="open"]')) return; openDay(t.getAttribute('data-date')); break;
     case 'close': closeDrawer(); break;
     case 'd-back': if(D.from) { D = {mode:'day', date:D.from}; drawDay(); } break;
+    case 'd-backp': if(D.fromP && dzPerson(D.fromP)) { D = {mode:'dperson', id:D.fromP}; drawDPerson(); var ls = dr.querySelector('.dz-entsec'); if(ls) try { ls.scrollIntoView({block:'start'}); } catch(err){} } break;
     case 'settings': openSettings(); break;
     case 'open-csync': openCSync(); break;
     case 'cs-paste':
@@ -3707,7 +3749,7 @@ document.addEventListener('click', function(e){
     case 'import': importInput.click(); break;
     case 'snooze': S.ui.snooze = Date.now() + 7 * 864e5; save(); renderNotices(); break;
     case 'del': armed(t, function(){ removeItem(id); render(); }); break;
-    case 'd-del': armed(t, function(){ var d = D; removeItem(d.id); if(d.from){ D = {mode:'day', date:d.from}; drawDay(); render(); } else closeDrawer(); }, 'Tap again to delete'); break;
+    case 'd-del': armed(t, function(){ var d = D; removeItem(d.id); if(d.fromP && dzPerson(d.fromP)){ D = {mode:'dperson', id:d.fromP}; drawDPerson(); render(); } else if(d.from){ D = {mode:'day', date:d.from}; drawDay(); render(); } else closeDrawer(); }, 'Tap again to delete'); break;
     case 'dismiss-rem': var it0 = getItem(id); if(it0){ it0.remDismissed = it0.reminder; save(); renderNotices(); } break;
     case 'show-done': var pg = t.getAttribute('data-page'); S.ui.showDone[pg] = !S.ui.showDone[pg]; save(); render(); break;
     case 'filter': var c = t.getAttribute('data-cat'); S.ui.hide[c] = !S.ui.hide[c]; save(); render(); break;
@@ -3937,7 +3979,9 @@ document.addEventListener('change', function(e){
     var f = el.getAttribute('data-df');
     if(['amount','balance','original','minPay'].indexOf(f) >= 0 && String(el.value).trim() !== '') el.value = num(el.value).toFixed(2);
     if(f === 'apr' && String(el.value).trim() !== '') el.value = String(num(el.value));
-    setField(it, f, el.type === 'checkbox' ? el.checked : el.value); save();
+    setField(it, f, el.type === 'checkbox' ? el.checked : el.value);
+    if(it.kind === 'dentry' && f === 'stayed' && el.checked && !validISO(it.left) && validISO(it.date)) it.left = addDays(it.date, 1);
+    save();
     if((f === 'start' || f === 'date') && (it.kind === 'bill' || it.kind === 'income' || it.kind === 'debt')){
       var redraw = function(){ if(D.mode === 'item' && D.id === it.id){ drawItem(); if(f === 'start'){ var pp2 = dr.querySelector('#past-pay'); if(pp2) try { pp2.scrollIntoView({block:'nearest', behavior:'smooth'}); } catch(err){} } } };
       if(document.activeElement === el) el.addEventListener('blur', redraw, {once:true}); else redraw();
