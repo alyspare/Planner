@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>One-Sided Users</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Blyssful Travels brand: same tokens as the Content Planner */
+  color-scheme: light;
+  --bg:#707F5E;
+  --on-bg:#FFFFFF;
+  --card:#FFFDF8;
+  --wash:#F5F0E6;
+  --ink:#1D2633;
+  --muted:#6B675F;
+  --line:#E6DECF;
+  --accent:#F0B7CE;
+  --accent-ink:#A8326A;
+  --sage-ink:#4A5838;
+  --font-display:"DM Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-accent:"Instrument Serif", Georgia, "Times New Roman", serif;
+  --ig-bg:#D6E8F5; --ig-fg:#17557F;
+  --igs-bg:#E6F3FB; --igs-fg:#2F6F96;
+  --bl-bg:#ECEED3; --bl-fg:#5A6224;
+  --idea-bg:#E7E5EE; --idea-fg:#4F4D63;
+  --draft-bg:#FCDDBE; --draft-fg:#9A470A;
+  --pub-bg:#D3EDD4; --pub-fg:#2B6A33;
+  --warn-bg:#F8DCD6; --warn-fg:#9C2F22;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-display);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased}
+:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
+button{font:inherit;color:inherit}
+[hidden]{display:none !important}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px 56px}
+
+/* header on sage */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 0 10px;color:var(--on-bg)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-0.01em;font-size:15px}
+.brand .sub2{font-weight:500;opacity:.9}
+.mark{width:30px;height:30px;border-radius:9px;background:var(--card);color:var(--sage-ink);display:grid;place-items:center;font-family:var(--font-accent);font-style:italic;font-size:21px;line-height:1}
+.sync{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;padding:5px 11px;border-radius:999px;background:rgba(255,255,255,.14);color:var(--on-bg);white-space:nowrap}
+.sync i{width:8px;height:8px;border-radius:50%;background:#CFE3B8;display:block}
+.sync.saving i{background:#F7D9A6}
+.sync.off i{background:#F2B4A8}
+nav.pages{display:flex;gap:4px;overflow-x:auto;padding:4px 0 12px;border-bottom:1px solid rgba(255,255,255,.2);scrollbar-width:none}
+nav.pages::-webkit-scrollbar{display:none}
+nav.pages a{flex:none;display:flex;gap:7px;align-items:baseline;padding:8px 12px;border-radius:10px;text-decoration:none;color:var(--on-bg);font-weight:500;white-space:nowrap}
+nav.pages a:hover{background:rgba(255,255,255,.12)}
+nav.pages a .n{font-size:11px;font-variant-numeric:tabular-nums;opacity:.8}
+nav.pages a[aria-current="page"]{background:var(--card);color:var(--ink)}
+
+.page-head{padding:24px 0 18px;color:var(--on-bg)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin:0 0 6px;opacity:.9}
+.card .eyebrow{color:var(--muted);opacity:1}
+h1{font-size:clamp(30px,4vw,46px);line-height:1.04;letter-spacing:-0.035em;margin:0;font-weight:700;text-wrap:balance}
+.hl{font-family:var(--font-accent);font-style:italic;font-weight:400;letter-spacing:-0.01em;font-size:1.12em;padding:0 .1em;color:#FFE6EF;background:linear-gradient(transparent 58%, rgba(240,183,206,.42) 58%, rgba(240,183,206,.42) 90%, transparent 90%)}
+.sub{margin:8px 0 0;max-width:65ch;font-size:15.5px;font-weight:500}
+.card{background:var(--card);border-radius:16px;box-shadow:0 1px 2px rgba(20,30,10,.12)}
+h2,h3{text-wrap:balance}
+
+/* controls */
+.btn{height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:0 14px;font-weight:600;cursor:pointer;white-space:nowrap;display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink)}
+.btn:hover{background:var(--wash)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:#2C3848}
+.btn.ghost{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);color:var(--on-bg)}
+.btn.ghost:hover{background:rgba(255,255,255,.22)}
+.btn.danger.armed{background:var(--warn-fg);color:#fff;border-color:var(--warn-fg)}
+.btn.sm{height:30px;padding:0 10px;font-size:12.5px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:var(--card);padding:0 12px;height:32px;font-size:12.5px;font-weight:600;cursor:pointer;color:var(--muted);white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+.seg button .c{font-variant-numeric:tabular-nums;font-weight:700;opacity:.75}
+.seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.search{height:36px;border:1px solid var(--line);border-radius:10px;padding:0 10px 0 32px;font:inherit;color:var(--ink);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%236B675F' stroke-width='2.4' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 11px center;width:220px;max-width:100%}
+.search:focus{outline:none;border-color:var(--sage-ink);box-shadow:0 0 0 3px rgba(74,88,56,.16)}
+.pill{display:inline-flex;align-items:center;height:22px;padding:0 9px;border-radius:999px;font-size:11.5px;font-weight:600;white-space:nowrap}
+
+/* import */
+.imp{padding:18px;margin-bottom:20px}
+.imp-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.imp-bar .grow{flex:1;min-width:220px}
+.imp-bar h2{margin:0;font-size:17px;letter-spacing:-0.015em}
+.imp-bar p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+.drop{margin-top:14px;border:1.5px dashed #CFC3AE;border-radius:14px;background:var(--wash);padding:26px 18px;display:grid;justify-items:center;text-align:center;gap:8px;transition:background .15s,border-color .15s}
+.drop.over{background:#FDF0F5;border-color:var(--accent-ink)}
+.drop svg{width:34px;height:34px;color:var(--sage-ink)}
+.drop h3{margin:2px 0 0;font-size:17px;letter-spacing:-0.015em}
+.drop p{margin:0;font-size:13px;color:var(--muted);max-width:52ch}
+.drop .acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.files{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;font-size:12px;font-weight:600;background:#EFEBE4;color:var(--muted)}
+.fchip.ok{background:var(--pub-bg);color:var(--pub-fg)}
+.fchip b{font-variant-numeric:tabular-nums}
+.msg{margin:12px 0 0;padding:10px 12px;border-radius:12px;font-size:13px;background:var(--wash)}
+.msg.err{background:var(--warn-bg);color:var(--warn-fg)}
+.msg.ok{background:var(--pub-bg);color:var(--pub-fg)}
+.msg ul{margin:4px 0 0;padding-left:18px}
+details.how{margin-top:14px;border-top:1px solid var(--line);padding-top:12px}
+details.how summary{cursor:pointer;font-weight:700;font-size:13px;list-style:none;display:flex;align-items:center;gap:8px}
+details.how summary::-webkit-details-marker{display:none}
+details.how summary::before{content:"›";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:6px;background:#F7E1EA;color:var(--accent-ink);font-size:15px;transition:transform .15s}
+details.how[open] summary::before{transform:rotate(90deg)}
+details.how ol{margin:10px 0 0;padding-left:20px;display:grid;gap:6px;font-size:13px;max-width:78ch}
+details.how .note{margin:10px 0 0;font-size:12.5px;color:var(--muted);max-width:78ch}
+
+/* tiles */
+.tiles{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:20px}
+.tile{border-radius:14px;padding:12px 14px;min-height:92px;display:flex;flex-direction:column;gap:1px;box-shadow:0 1px 2px rgba(20,30,10,.12)}
+.tile .k{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+.tile .v{font-size:28px;font-weight:700;letter-spacing:-0.02em;font-variant-numeric:tabular-nums;line-height:1.15}
+.tile .d{font-size:11.5px;opacity:.85}
+.t-blue{background:var(--ig-bg);color:var(--ig-fg)}
+.t-sky{background:var(--igs-bg);color:var(--igs-fg)}
+.t-olive{background:var(--bl-bg);color:var(--bl-fg)}
+.t-pink{background:#F7E1EA;color:var(--accent-ink)}
+.t-orange{background:var(--draft-bg);color:var(--draft-fg)}
+.t-green{background:var(--pub-bg);color:var(--pub-fg)}
+
+/* list */
+.list{overflow:hidden}
+.list-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:16px 16px 14px}
+.list-head h2{margin:0;font-size:21px;letter-spacing:-0.02em}
+.list-ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tbl-wrap{overflow-x:auto;border-top:1px solid var(--line)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:13px}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);text-align:left;font-weight:700;padding:11px 10px;background:var(--wash);border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover td{background:#FFF9F0}
+th:first-child,td:first-child{padding-left:16px}
+th:last-child,td:last-child{padding-right:16px}
+th .sort{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:5px;font:inherit;color:inherit;letter-spacing:inherit;text-transform:inherit;white-space:nowrap}
+th .sort:hover{color:var(--ink)}
+th .sort:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px;border-radius:4px}
+th .sort .arr{font-size:9px;opacity:.45}
+th .sort.on{color:var(--ink)}
+th .sort.on .arr{opacity:1;color:var(--accent-ink)}
+.num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;width:44px;text-align:right}
+.user{display:flex;align-items:center;gap:8px;min-width:0}
+.user a{font-weight:700;color:var(--ink);text-decoration:none;overflow-wrap:anywhere}
+.user a:hover{text-decoration:underline}
+.user .at{color:var(--muted);font-weight:500}
+.new{height:19px;padding:0 7px;font-size:10.5px;font-weight:700;letter-spacing:.03em;background:var(--accent-ink);color:#fff}
+.dt{font-variant-numeric:tabular-nums;white-space:nowrap}
+.dt small{display:block;color:var(--muted);font-size:11.5px}
+.dur{font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
+.open-btn{height:28px;padding:0 10px;border-radius:8px;border:1px solid var(--line);background:var(--card);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center;color:var(--ink);text-decoration:none}
+.open-btn:hover{background:#F7E1EA;border-color:var(--accent);color:var(--accent-ink)}
+.pick{appearance:none;-webkit-appearance:none;border:0;border-radius:999px;height:28px;padding:0 26px 0 11px;font:inherit;font-size:12px;font-weight:600;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23615b54' stroke-width='1.5'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.pick.s-todo{background-color:var(--idea-bg);color:var(--idea-fg)}
+.pick.s-keep{background-color:var(--igs-bg);color:var(--igs-fg)}
+.pick.s-done{background-color:var(--pub-bg);color:var(--pub-fg)}
+tr.is-done .user a{text-decoration:line-through;color:var(--muted)}
+tr.is-done .dt,tr.is-done .dur{opacity:.6}
+.tbl-empty{padding:26px 16px;color:var(--muted);margin:0;text-align:center}
+.table-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted)}
+
+.ctl{height:36px;border-radius:10px;border:1px solid var(--line);background:var(--card);padding:0 10px;font:inherit;color:var(--ink);cursor:pointer;max-width:100%}
+.m-only,.m-dur{display:none}
+button.sync{border:0;cursor:pointer;font-family:inherit}
+button.sync:hover{background:rgba(255,255,255,.24)}
+.sync-card{padding:18px;margin-bottom:20px}
+.sync-card .imp-bar p{margin:2px 0 0;font-size:12.5px;color:var(--muted);max-width:70ch}
+.sync-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.sync-form label{display:grid;gap:4px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.sync-form input{height:38px;border:1px solid var(--line);border-radius:10px;padding:0 10px;font:inherit;font-size:14px;letter-spacing:0;text-transform:none;font-weight:500;color:var(--ink);background:#fff;width:100%}
+.sync-form input:focus{outline:none;border-color:var(--sage-ink);box-shadow:0 0 0 3px rgba(74,88,56,.16)}
+.sync-form .wide{grid-column:1/-1}
+.sync-form .acts{display:flex;gap:8px;flex-wrap:wrap}
+.btn:disabled{opacity:.6;cursor:wait}
+.sync-on{margin-top:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:var(--wash);font-size:13px}
+.sync-on .grow{flex:1;min-width:200px}
+.muted{color:var(--muted)}
+.btn.danger{color:var(--warn-fg)}
+details.how a{color:var(--accent-ink);font-weight:600}
+@media (max-width:700px){.sync-form{grid-template-columns:1fr}}
+.ev{height:22px}
+.ev-f{background:var(--pub-bg);color:var(--pub-fg)}
+.ev-lost{background:#F7E1EA;color:var(--accent-ink)}
+.ev-you{background:var(--igs-bg);color:var(--igs-fg)}
+.tag{height:20px;font-size:11px;padding:0 8px;margin:2px 4px 0 0}
+.tag-still{background:var(--draft-bg);color:var(--draft-fg)}
+.tag-back{background:var(--bl-bg);color:var(--bl-fg)}
+.lostp{height:19px;padding:0 7px;font-size:10.5px;font-weight:700;letter-spacing:.03em;background:#F7E1EA;color:var(--accent-ink)}
+.c-det{font-size:12.5px;color:var(--muted)}
+.md{display:block;font-size:11px;color:var(--muted);margin:3px 0 0 4px;white-space:nowrap}
+.log{margin-top:20px}
+.logt td,.logt th{white-space:nowrap}
+.logt .r{text-align:right;font-variant-numeric:tabular-nums}
+.logt .up{color:var(--pub-fg);font-weight:700}
+.logt .down{color:var(--accent-ink);font-weight:700}
+.hist-empty{padding:22px 18px}
+.hist-empty h2{margin:0 0 6px;font-size:19px;letter-spacing:-0.015em}
+.hist-empty p{margin:0;color:var(--muted);max-width:70ch}
+.vh{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;overflow:hidden}
+.loading{padding:28px 18px;text-align:center;color:var(--muted)}
+
+footer{margin-top:36px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2);display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;color:var(--on-bg);font-size:13px}
+
+@media (max-width:1060px){.tiles{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:700px){
+  .wrap{padding:0 16px 48px}
+  .tiles{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+  .tile{min-height:80px;padding:10px 12px}
+  .tile .v{font-size:23px}
+  .list-head{padding:14px 12px 12px}
+  .list-ctl{width:100%}
+  .search{width:100%}
+  .seg{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line)}
+  .seg button{justify-content:center;height:36px}
+  .m-only{display:block;width:100%}
+  .cards,.cards tbody{display:block}
+  .cards thead,.c-num,.c-dur{display:none}
+  .cards tbody tr{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"user open stat" "dt open stat";column-gap:8px;row-gap:1px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--line)}
+  .cards tbody tr:last-child{border-bottom:0}
+  .cards tbody tr td,.cards tbody tr:hover td{border:0;padding:0;background:none}
+  .cards tbody tr:hover{background:#FFF9F0}
+  td.c-user{grid-area:user;min-width:0}
+  td.dt{grid-area:dt;font-size:12px;color:var(--muted);white-space:normal}
+  .ost td.dt::before{content:"Followed "}
+  .hist tbody tr{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"user open" "ev open" "dt dt" "det det";row-gap:3px}
+  .hist td.c-ev{grid-area:ev}
+  .hist td.c-det{grid-area:det}
+  .hist td.c-det:empty{display:none}
+  .hist td.dt{font-size:12.5px;color:var(--ink)}
+  .hist td.dt small{display:inline;margin-left:6px}
+  .m-dur{display:inline}
+  td.c-open{grid-area:open}
+  td.c-stat{grid-area:stat}
+  .user a{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px}
+  .open-btn{width:34px;height:32px;padding:0;justify-content:center}
+  .open-btn .lbl{display:none}
+  .pick{height:32px;min-width:116px;padding:0 24px 0 10px;background-position:right 9px center}
+  .m-dur{white-space:nowrap}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="mark" aria-hidden="true">B</span><span>Blyssful Travels <span class="sub2">Content Studio</span></span></div>
+    <button class="sync" id="sync" type="button" aria-controls="syncCard" aria-expanded="false"><i></i><span id="syncText" role="status">This device · Set up sync</span></button>
+  </header>
+  <nav class="pages" aria-label="Pages">
+    <a href="https://claude.ai/artifact/ELXGWDWRfWoaL3LaCp7D2t" target="_blank" rel="noopener"><span class="n">↗</span>Content Planner</a>
+    <a href="#users" data-view="users" aria-current="page"><span class="n">01</span>One-Sided Users</a>
+    <a href="#history" data-view="history"><span class="n">02</span>Follow History</a>
+  </nav>
+
+  <main>
+    <div class="page-head">
+      <p class="eyebrow" id="phEyebrow">Instagram · Follow-back check</p>
+      <h1 id="phTitle">One-Sided <span class="hl">Users</span></h1>
+      <p class="sub" id="phSub">Accounts you follow that don’t follow you back. Import your Instagram download, then work down the list: open a profile, unfollow, and mark it here.</p>
+    </div>
+
+    <section class="card sync-card" id="syncCard" aria-labelledby="syncTitle" hidden>
+      <div class="imp-bar">
+        <div class="grow">
+          <p class="eyebrow">Sync across devices</p>
+          <h2 id="syncTitle">Save to GitHub</h2>
+          <p>Keeps your last import and your marks in a data file in one of your GitHub repos, so your phone, iPad and computer share one list.</p>
+        </div>
+        <button class="btn" id="syncClose" type="button">Close</button>
+      </div>
+      <div id="syncMsg"></div>
+      <form class="sync-form" id="syncForm" autocomplete="off" novalidate>
+        <label>GitHub username<input id="gOwner" autocapitalize="off" spellcheck="false" placeholder="yourname"></label>
+        <label>Private repository<input id="gRepo" autocapitalize="off" spellcheck="false" placeholder="blyssful-data"></label>
+        <label>Data file<input id="gPath" autocapitalize="off" spellcheck="false" value="one-sided-users.json"></label>
+        <label class="wide">Access token<input id="gToken" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="github_pat_…"></label>
+        <div class="wide acts"><button class="btn primary" type="submit" id="gConnect">Connect</button></div>
+      </form>
+      <div class="sync-on" id="syncOn" hidden>
+        <div class="grow"><span id="syncWhere"></span><br><span class="muted" id="syncWhen"></span></div>
+        <button class="btn sm" id="syncNow" type="button">Sync now</button>
+        <a class="btn sm" id="syncFile" href="#" target="_blank" rel="noopener">Open file on GitHub ↗</a>
+        <button class="btn sm danger" id="syncOff" type="button">Disconnect this device</button>
+      </div>
+      <details class="how">
+        <summary>How to set this up (about 5 minutes)</summary>
+        <ol>
+          <li>On GitHub, create a new <b>private</b> repository to hold the data, for example <b>blyssful-data</b>. It can be empty.</li>
+          <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> (Settings › Developer settings › Personal access tokens › Fine-grained tokens › Generate new token).</li>
+          <li>Name it <b>One-Sided Users</b> and pick an expiration. Under <b>Repository access</b>, choose <b>Only select repositories</b> and pick your data repo.</li>
+          <li>Under <b>Permissions › Repository permissions</b>, set <b>Contents</b> to <b>Read and write</b>. Generate the token and copy it.</li>
+          <li>Enter your username, the repo name and the token here, then tap <b>Connect</b>. Do the same once on each device.</li>
+        </ol>
+        <p class="note">The token stays in this browser on this device and is only ever sent to GitHub. Give it access to the data repo only. Each batch of changes is saved as a small commit to that repo, and the page checks for changes from your other devices whenever you come back to it.</p>
+      </details>
+    </section>
+
+    <section class="card imp" id="imp" aria-labelledby="impTitle">
+      <div class="imp-bar">
+        <div class="grow">
+          <p class="eyebrow" id="impEyebrow">Step 1</p>
+          <h2 id="impTitle">Import your Instagram files</h2>
+          <p id="impMeta">Your files are read on this device. Only the one-sided list and your marks are saved.</p>
+        </div>
+        <button class="btn" id="impToggle" type="button" hidden aria-expanded="false" aria-controls="impBody">Import new files</button>
+      </div>
+      <div id="impMsg"></div>
+      <div id="impBody">
+        <div class="drop" id="drop">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>
+          <h3>Drop your Instagram download here</h3>
+          <p>The whole <b>ZIP</b> (best: it carries the export date), or <b>following.json</b> and <b>followers_1.json</b> from inside it. Add followers_2.json and recently_unfollowed_profiles.json too if you have them.</p>
+          <div class="acts">
+            <button class="btn primary" id="pick" type="button">Choose files</button>
+          </div>
+          <div class="files" id="fileChips"></div>
+          <input type="file" id="fileIn" class="vh" multiple accept=".json,.zip,application/json,application/zip" tabindex="-1" aria-hidden="true">
+        </div>
+        <details class="how" id="how">
+          <summary>How to get these files from Instagram</summary>
+          <ol>
+            <li>In Instagram, open <b>Settings</b>, then <b>Accounts Center</b> (it may say <b>Meta Account</b>), then <b>Your information and permissions</b>.</li>
+            <li>Tap <b>Export your information</b> (older versions say Download your information), then <b>Create export</b>.</li>
+            <li>Pick your Instagram profile, then <b>Export to device</b>.</li>
+            <li>Under <b>Customize information</b>, choose just <b>Followers and following</b>. Set <b>Date range</b> to <b>All time</b> and <b>Format</b> to <b>JSON</b>, then start the export.</li>
+            <li>When Instagram emails you that it’s ready, download the ZIP and drop it here. Or unzip it and choose the files in <b>connections › followers_and_following</b>.</li>
+          </ol>
+          <p class="note">Instagram’s download is a snapshot from the day you request it. Your first import records every follower and the date they followed you. Each import after that compares against the last one, and anyone missing is recorded as having unfollowed you between those two export dates. Importing every week or two keeps those windows short.</p>
+        </details>
+      </div>
+    </section>
+
+    <div class="card loading" id="loading">Loading your saved list…</div>
+
+    <div id="results" hidden>
+      <div class="tiles" id="tiles"></div>
+
+      <section class="card list" aria-labelledby="listTitle">
+        <div class="list-head">
+          <div>
+            <p class="eyebrow" id="listEyebrow">From your import</p>
+            <h2 id="listTitle">Don’t follow you back</h2>
+          </div>
+          <div class="list-ctl">
+            <select class="ctl m-only" id="msort" aria-label="Sort by">
+              <option value="t:1">Oldest follow first</option>
+              <option value="t:-1">Newest follow first</option>
+              <option value="u:1">Username A–Z</option>
+              <option value="u:-1">Username Z–A</option>
+            </select>
+            <input class="search" id="q" type="search" placeholder="Search usernames" aria-label="Search usernames" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <div class="seg" id="filt" role="group" aria-label="Show">
+              <button type="button" data-f="all" aria-pressed="true">All <span class="c" id="cAll"></span></button>
+              <button type="button" data-f="todo" aria-pressed="false">To review <span class="c" id="cTodo"></span></button>
+              <button type="button" data-f="keep" aria-pressed="false">Keep <span class="c" id="cKeep"></span></button>
+              <button type="button" data-f="done" aria-pressed="false">Unfollowed <span class="c" id="cDone"></span></button>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="cards ost">
+            <thead>
+              <tr>
+                <th class="num c-num">#</th>
+                <th><button class="sort" data-sort="u" type="button">Username <span class="arr">▲</span></button></th>
+                <th><button class="sort" data-sort="t" type="button">You followed them <span class="arr">▲</span></button></th>
+                <th class="c-dur">Following for</th>
+                <th>Profile</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+          </table>
+          <p class="tbl-empty" id="empty" hidden></p>
+        </div>
+        <div class="table-foot">
+          <span id="showing"></span>
+          <button class="btn sm" id="more" type="button" hidden>Show more</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="histView" hidden>
+      <div class="tiles" id="hTiles"></div>
+      <section class="card list" aria-labelledby="hTitle">
+        <div class="list-head">
+          <div>
+            <p class="eyebrow" id="hEyebrow">Recorded from your imports</p>
+            <h2 id="hTitle">Follows and unfollows</h2>
+          </div>
+          <div class="list-ctl">
+            <input class="search" id="hq" type="search" placeholder="Search usernames" aria-label="Search follow history" autocomplete="off" autocapitalize="off" spellcheck="false">
+            <div class="seg" id="hfilt" role="group" aria-label="Show">
+              <button type="button" data-h="all" aria-pressed="true">All <span class="c" id="hcAll"></span></button>
+              <button type="button" data-h="f" aria-pressed="false">Followed you <span class="c" id="hcF"></span></button>
+              <button type="button" data-h="lost" aria-pressed="false">Unfollowed you <span class="c" id="hcLost"></span></button>
+              <button type="button" data-h="you" aria-pressed="false">You unfollowed <span class="c" id="hcYou"></span></button>
+            </div>
+          </div>
+        </div>
+        <div class="tbl-wrap">
+          <table class="cards hist">
+            <thead>
+              <tr><th>Username</th><th>What happened</th><th>When</th><th>Details</th><th>Profile</th></tr>
+            </thead>
+            <tbody id="hRows"></tbody>
+          </table>
+          <p class="tbl-empty" id="hEmpty" hidden></p>
+        </div>
+        <div class="table-foot">
+          <span id="hShowing"></span>
+          <button class="btn sm" id="hMore" type="button" hidden>Show more</button>
+        </div>
+      </section>
+      <section class="card list log" aria-labelledby="logTitle">
+        <div class="list-head"><div><p class="eyebrow">One row per import</p><h2 id="logTitle">Import log</h2></div></div>
+        <div class="tbl-wrap">
+          <table class="logt">
+            <thead><tr><th>Export date</th><th class="r">Followers</th><th class="r">Following</th><th class="r">New followers</th><th class="r">Unfollowed you</th></tr></thead>
+            <tbody id="logRows"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <div class="card hist-empty" id="histEmpty" hidden>
+      <h2>Your follow history starts with your next import</h2>
+      <p>The first import records every current follower and the date they followed you. Each import after that adds who unfollowed you, dated between your two exports, plus any accounts you unfollowed.</p>
+    </div>
+  </main>
+
+  <footer>
+    <span id="footNote">Your list and marks are saved in this browser on this device. Your Instagram files never leave your device.</span>
+    <button class="btn ghost sm danger" id="clearBtn" type="button" hidden>Clear all data</button>
+  </footer>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const nf=new Intl.NumberFormat("en-US");
+const fmtN=n=>nf.format(n||0);
+const PAGE=250;
+const LKEY="blyssful-onesided-v1";
+
+/* ---------- state ---------- */
+let cur=null;            // {importedAt, following, followers, mutual, users:[{u,t}], fresh:[k], files:[name]}
+let marks=new Map();     // lowercase username -> "keep" | "done"
+let freshSet=new Set();
+let stage=null;          // files picked but not yet complete
+let view={f:"all",q:"",sort:"t",dir:1,limit:PAGE};
+let loaded=true;
+
+/* ---------- Instagram file parsing ---------- */
+const JSON_RE=/(^|\/)(followers(_\d+)?|following|recently_unfollowed_(profiles|accounts))\.json$/i;
+const HTML_RE=/(^|\/)(followers(_\d+)?|following)\.html$/i;
+const base=n=>String(n).split("/").pop();
+
+function toUser(e){
+  if(!e||typeof e!=="object")return null;
+  const s=(Array.isArray(e.string_list_data)&&e.string_list_data[0])||{};
+  let u=(typeof s.value==="string"&&s.value.trim())||(typeof e.title==="string"&&e.title.trim())||"";
+  if(!u&&typeof s.href==="string"){const m=s.href.match(/instagram\.com\/(?:_u\/)?([A-Za-z0-9._]+)/i);if(m)u=m[1];}
+  u=u.replace(/^@/,"");
+  if(!/^[A-Za-z0-9._]{1,30}$/.test(u))return null;
+  return {u,t:Number(s.timestamp)||0};
+}
+function classify(j,name){
+  const n=base(name).toLowerCase();
+  if(Array.isArray(j))return {kind:/^following/.test(n)?"following":/^recently_unfollowed/.test(n)?"unf":"followers",list:j};
+  if(j&&typeof j==="object"){
+    if(Array.isArray(j.relationships_following))return {kind:"following",list:j.relationships_following};
+    if(Array.isArray(j.relationships_followers))return {kind:"followers",list:j.relationships_followers};
+    const uk=Object.keys(j).find(k=>/unfollowed/i.test(k)&&Array.isArray(j[k]));
+    if(uk)return {kind:"unf",list:j[uk]};
+    const k=Object.keys(j).find(k=>/^relationships_/.test(k)&&Array.isArray(j[k]));
+    if(k)return {kind:null,other:k.replace(/^relationships_/,"").replace(/_/g," ")};
+  }
+  return {kind:null};
+}
+function ingest(name,text,notes){
+  let j;
+  try{j=JSON.parse(text);}catch(e){notes.push({err:true,t:`${base(name)} isn’t a readable JSON file.`});return;}
+  const c=classify(j,name);
+  if(!c.kind){notes.push({err:!c.other,t:c.other?`${base(name)} is your “${c.other}” list, not followers or following, so it was skipped.`:`${base(name)} doesn’t look like an Instagram followers or following file.`});return;}
+  const map=stage[c.kind]||new Map();let n=0;
+  c.list.forEach(e=>{const x=toUser(e);if(!x)return;n++;const k=x.u.toLowerCase();const had=map.get(k);if(!had||(!had.t&&x.t)||(c.kind==="unf"&&x.t>had.t))map.set(k,x);});
+  if(!n){notes.push({err:true,t:`${base(name)} has no usernames in it.`});return;}
+  stage[c.kind]=map;stage.files.push(base(name));
+}
+
+/* minimal ZIP reader: reads only the entries it needs, supports ZIP64 */
+async function readZip(file){
+  const size=file.size;const tailLen=Math.min(size,65557);
+  const tail=new DataView(await file.slice(size-tailLen).arrayBuffer());
+  let eo=-1;for(let i=tail.byteLength-22;i>=0;i--){if(tail.getUint32(i,true)===0x06054b50){eo=i;break;}}
+  if(eo<0)throw new Error("notzip");
+  let count=tail.getUint16(eo+10,true),cdSize=tail.getUint32(eo+12,true),cdOff=tail.getUint32(eo+16,true);
+  if(count===0xFFFF||cdSize===0xFFFFFFFF||cdOff===0xFFFFFFFF){
+    const lp=eo-20;
+    if(lp>=0&&tail.getUint32(lp,true)===0x07064b50){
+      const zo=Number(tail.getBigUint64(lp+8,true));
+      const z=new DataView(await file.slice(zo,zo+56).arrayBuffer());
+      if(z.getUint32(0,true)===0x06064b50){count=Number(z.getBigUint64(32,true));cdSize=Number(z.getBigUint64(40,true));cdOff=Number(z.getBigUint64(48,true));}
+    }
+  }
+  const cd=new DataView(await file.slice(cdOff,cdOff+cdSize).arrayBuffer());
+  const dec=new TextDecoder();const entries=[];let p=0;
+  for(let i=0;i<count&&p+46<=cd.byteLength;i++){
+    if(cd.getUint32(p,true)!==0x02014b50)break;
+    const method=cd.getUint16(p+10,true);
+    let csize=cd.getUint32(p+20,true),usize=cd.getUint32(p+24,true);
+    const nl=cd.getUint16(p+28,true),xl=cd.getUint16(p+30,true),cl=cd.getUint16(p+32,true);
+    let lho=cd.getUint32(p+42,true);
+    const name=dec.decode(new Uint8Array(cd.buffer,cd.byteOffset+p+46,nl));
+    let x=p+46+nl;const xe=x+xl;
+    while(x+4<=xe){
+      const id=cd.getUint16(x,true),len=cd.getUint16(x+2,true);
+      if(id===1){let q=x+4;
+        if(usize===0xFFFFFFFF){usize=Number(cd.getBigUint64(q,true));q+=8;}
+        if(csize===0xFFFFFFFF){csize=Number(cd.getBigUint64(q,true));q+=8;}
+        if(lho===0xFFFFFFFF){lho=Number(cd.getBigUint64(q,true));q+=8;}
+      }
+      x+=4+len;
+    }
+    entries.push({name,method,csize,lho});
+    p=xe+cl;
+  }
+  async function read(e){
+    const lh=new DataView(await file.slice(e.lho,e.lho+30).arrayBuffer());
+    if(lh.getUint32(0,true)!==0x04034b50)throw new Error("badentry");
+    const start=e.lho+30+lh.getUint16(26,true)+lh.getUint16(28,true);
+    const blob=file.slice(start,start+e.csize);
+    if(e.method===0)return await blob.text();
+    if(e.method===8){
+      if(typeof DecompressionStream==="undefined")throw new Error("nodeflate");
+      return await new Response(blob.stream().pipeThrough(new DecompressionStream("deflate-raw"))).text();
+    }
+    throw new Error("method");
+  }
+  return {entries,read};
+}
+
+async function handleFiles(list){
+  const files=[...list];if(!files.length)return;
+  if(!stage)stage={following:null,followers:null,unf:null,files:[],exportAt:0};
+  const notes=[];
+  setMsg([{t:"Reading your files…"}]);
+  for(const f of files){
+    const isZip=/\.zip$/i.test(f.name)||/zip/.test(f.type||"");
+    if(isZip){
+      try{
+        const z=await readZip(f);
+        const dm=f.name.match(/(20\d{2})-(\d{2})-(\d{2})/);
+        if(dm){const d=new Date(+dm[1],+dm[2]-1,+dm[3],12).getTime();if(d>stage.exportAt)stage.exportAt=d;}
+        let hits=z.entries.filter(e=>JSON_RE.test(e.name)&&!/(^|\/)__MACOSX\//.test(e.name));
+        const ff=hits.filter(e=>/followers_and_following\//i.test(e.name));
+        if(ff.length)hits=ff;
+        if(!hits.length){
+          notes.push({err:true,t:z.entries.some(e=>HTML_RE.test(e.name))
+            ?`${f.name} was exported as HTML. Request a new export with Format set to JSON.`
+            :`${f.name} has no followers or following files. When you export, include “Followers and following”.`});
+          continue;
+        }
+        for(const e of hits){ingest(e.name,await z.read(e),notes);}
+      }catch(err){
+        notes.push({err:true,t:err&&err.message==="nodeflate"
+          ?`This browser can’t open ZIP files. Unzip ${f.name} first, then choose following.json and followers_1.json.`
+          :`${f.name} couldn’t be opened as a ZIP. Unzip it first, then choose following.json and followers_1.json.`});
+      }
+    }else if(/\.html?$/i.test(f.name)){
+      notes.push({err:true,t:`${f.name} is an HTML file. Request your export again with Format set to JSON.`});
+    }else{
+      try{ingest(f.name,await f.text(),notes);}catch(e){notes.push({err:true,t:`${f.name} couldn’t be read.`});}
+    }
+  }
+  if(stage.following&&stage.followers){
+    await pullFirst();
+    const r=finishImport();
+    if(r.older){
+      stage=null;
+      notes.unshift({err:true,t:`This download is from ${fmtMs(r.at)}, which is older than the one already imported (${fmtMs(r.prevAt)}), so nothing was changed.`});
+      setMsg(notes);
+    }else{
+      const ok=[`Imported ${fmtN(cur.following)} following and ${fmtN(cur.followers)} followers. ${fmtN(cur.users.length)} don’t follow you back.`];
+      if(r.base)ok.push(`Follow history started: recorded ${fmtN(cur.followers)} followers with the dates they followed you.`);
+      else ok.push(`Since your last export (${fmtMs(r.prevAt)}): ${fmtN(r.gained)} new followers, ${fmtN(r.lost)} unfollowed you.`);
+      if(r.unf)ok.push(`Recorded ${fmtN(r.unf)} accounts you unfollowed.`);
+      ok.push(`Export date: ${fmtMs(cur.exportAt)} (${cur.exportSrc}).`);
+      notes.unshift(...ok.map(t=>({ok:true,t})));
+      setMsg(notes);setImpOpen(false);
+    }
+  }else if(stage.unf&&!stage.following&&!stage.followers&&cur){
+    if(!cur.hist)cur.hist={noBase:1,followers:[],gone:[],youUnf:[],snaps:[]};
+    const n=mergeYouUnf(cur.hist,stage.unf);
+    cur.updatedAt=Date.now();stage=null;changed(300);render();
+    notes.unshift({ok:true,t:n?`Recorded ${fmtN(n)} accounts you unfollowed.`:"Those accounts you unfollowed were already recorded."});
+    setMsg(notes);
+  }else{
+    if(stage.following&&!stage.followers)notes.push({t:"Following list loaded. Now add followers_1.json (and followers_2.json if you have one)."});
+    else if(stage.followers&&!stage.following)notes.push({t:"Followers list loaded. Now add following.json."});
+    setMsg(notes);
+  }
+  renderChips();
+}
+function finishImport(){
+  const ing=stage.following,fol=stage.followers;
+  let maxT=0;ing.forEach(v=>{if(v.t>maxT)maxT=v.t;});fol.forEach(v=>{if(v.t>maxT)maxT=v.t;});
+  let exportAt=stage.exportAt||Date.now();
+  const exportSrc=stage.exportAt?"from the ZIP file name":"today’s date; import the ZIP to use the real export date";
+  if(maxT*1000>exportAt)exportAt=maxT*1000;
+  const prevH=cur&&cur.hist&&!cur.hist.noBase&&Array.isArray(cur.hist.followers)?cur.hist:null;
+  if(prevH&&exportAt<prevH.exportAt-43200000)return {older:true,at:exportAt,prevAt:prevH.exportAt};
+  /* one-sided list */
+  const users=[];let mutual=0;
+  ing.forEach((v,k)=>{if(fol.has(k))mutual++;else users.push({u:v.u,t:v.t});});
+  const prev=cur&&Array.isArray(cur.users)?new Set(cur.users.map(x=>x.u.toLowerCase())):null;
+  const fresh=prev?users.filter(x=>!prev.has(x.u.toLowerCase())).map(x=>x.u.toLowerCase()):[];
+  /* follow history: compare this export's followers with the last one */
+  const followers=[...fol.values()].map(x=>({u:x.u,t:x.t}));
+  const oldUnf=cur&&cur.hist&&Array.isArray(cur.hist.youUnf)?cur.hist.youUnf.slice():[];
+  let hist,gained=0;const lost=[];
+  if(!prevH){
+    hist={firstAt:exportAt,exportAt,followers,gone:[],youUnf:oldUnf,snaps:[{at:exportAt,followers:fol.size,following:ing.size,gained:0,lost:0,base:1}],newF:[]};
+  }else{
+    const pm=new Map(prevH.followers.map(x=>[x.u.toLowerCase(),x]));
+    pm.forEach((x,k)=>{if(!fol.has(k))lost.push({u:x.u,t:x.t,a:prevH.exportAt,b:exportAt});});
+    const newF=[];fol.forEach((x,k)=>{if(!pm.has(k))newF.push(k);});gained=newF.length;
+    let snaps=prevH.snaps.slice();const last=snaps[snaps.length-1];
+    const same=!gained&&!lost.length&&last&&last.followers===fol.size&&last.following===ing.size;
+    if(same)snaps[snaps.length-1]=Object.assign({},last,{at:exportAt});   /* same data again: just move the date forward */
+    else snaps.push({at:exportAt,followers:fol.size,following:ing.size,gained,lost:lost.length});
+    if(snaps.length>300)snaps=snaps.slice(-300);
+    hist={firstAt:prevH.firstAt,exportAt,followers,gone:prevH.gone.concat(lost),youUnf:oldUnf,snaps,newF:same?(prevH.newF||[]):newF};
+  }
+  const unfN=stage.unf?mergeYouUnf(hist,stage.unf):0;
+  const now=Date.now();
+  cur={v:2,importedAt:now,updatedAt:now,exportAt,exportSrc,following:ing.size,followers:fol.size,mutual,users,fresh,files:stage.files.slice(0,8),hist};
+  freshSet=new Set(fresh);
+  stage=null;view.limit=PAGE;hv.limit=PAGE;
+  changed(300);
+  render();
+  return {base:!prevH,gained,lost:lost.length,prevAt:prevH&&prevH.exportAt,unf:unfN};
+}
+const dayKey=ms=>ms?new Date(ms).toISOString().slice(0,10):"0";
+function mergeYouUnf(h,map){
+  if(!Array.isArray(h.youUnf))h.youUnf=[];
+  const seen=new Set(h.youUnf.map(x=>x.u.toLowerCase()+"|"+dayKey(x.d)));let n=0;
+  map.forEach(x=>{const d=(x.t||0)*1000,key=x.u.toLowerCase()+"|"+dayKey(d);if(seen.has(key))return;seen.add(key);h.youUnf.push({u:x.u,d});n++;});
+  return n;
+}
+async function pullFirst(){
+  /* with sync on, fetch other devices' latest before comparing, so history stays one chain */
+  if(!gh)return;
+  for(let i=0;i<50&&syncing;i++)await new Promise(r=>setTimeout(r,200));
+  await sync();
+}
+
+/* ---------- saving: this browser, plus an optional data file in GitHub ---------- */
+const CFG_KEY="blyssful-onesided-github-v1";
+const API="https://api.github.com";
+let gh=null;                 // {owner, repo, path, token}
+let clearedAt=0;             // when the list was last cleared
+let marksReset=0;            // a clear made here that GitHub hasn't seen yet
+let dirty=new Map();         // mark changes GitHub hasn't seen yet: username -> keep | done | todo
+let rev=0;                   // bumps on every local change
+let ghState="off",ghErr="",lastSync=0;
+let syncing=false,again=false,syncTimer=null;
+
+function marksList(m){return [...m].sort((a,b)=>a[0]<b[0]?-1:a[0]>b[0]?1:0).map(([u,v])=>({u,s:v.s,d:v.d||0}));}
+function readMarks(list){const m=new Map();if(Array.isArray(list))list.forEach(x=>{if(x&&typeof x.u==="string"&&(x.s==="keep"||x.s==="done"))m.set(x.u.toLowerCase(),{s:x.s,d:Number(x.d)||0});});return m;}
+const stamp=x=>x?(x.updatedAt||x.importedAt||0):0;
+function applyCurrent(d){
+  if(d&&Array.isArray(d.users)){cur=d;freshSet=new Set(Array.isArray(d.fresh)?d.fresh:[]);}else{cur=null;freshSet=new Set();}
+}
+function saveLocal(){try{localStorage.setItem(LKEY,JSON.stringify({cur,marks:marksList(marks),clearedAt,marksReset,dirty:[...dirty].map(([u,v])=>({u,s:v.s,d:v.d||0}))}));}catch(e){}}
+function loadLocal(){
+  try{
+    const v=JSON.parse(localStorage.getItem(LKEY)||"null");if(!v)return;
+    applyCurrent(v.cur);
+    marks=readMarks(Array.isArray(v.marks)?v.marks:v.marks&&v.marks.list);
+    clearedAt=Number(v.clearedAt)||0;marksReset=Number(v.marksReset)||0;
+    dirty=new Map();
+    if(Array.isArray(v.dirty))v.dirty.forEach(x=>{if(x&&typeof x.u==="string"&&/^(keep|done|todo)$/.test(x.s))dirty.set(x.u,{s:x.s,d:Number(x.d)||0});});
+  }catch(e){}
+}
+function changed(delay){
+  rev++;saveLocal();
+  if(gh){if(!syncing)ghState="pending";setSync();clearTimeout(syncTimer);syncTimer=setTimeout(sync,delay);}
+}
+function loadCfg(){try{const v=JSON.parse(localStorage.getItem(CFG_KEY)||"null");if(v&&v.owner&&v.repo&&v.path&&v.token)gh=v;}catch(e){}}
+function saveCfg(){try{if(gh)localStorage.setItem(CFG_KEY,JSON.stringify(gh));else localStorage.removeItem(CFG_KEY);}catch(e){}}
+
+/* GitHub REST API: repository contents */
+const repoUrl=c=>`${API}/repos/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}`;
+const fileUrl=c=>repoUrl(c)+"/contents/"+c.path.split("/").filter(Boolean).map(encodeURIComponent).join("/");
+const fileWeb=c=>`https://github.com/${encodeURIComponent(c.owner)}/${encodeURIComponent(c.repo)}/blob/HEAD/${c.path.split("/").filter(Boolean).map(encodeURIComponent).join("/")}`;
+function call(c,url,opt){
+  opt=opt||{};
+  return fetch(url,{method:opt.method||"GET",cache:"no-store",body:opt.body,
+    headers:Object.assign({"Accept":"application/vnd.github+json","Authorization":"Bearer "+c.token},opt.headers||{})});
+}
+async function errOf(r){let m="";try{m=(await r.json()).message||"";}catch(e){}const x=new Error(m||("HTTP "+r.status));x.status=r.status;return x;}
+function b64enc(str){const b=new TextEncoder().encode(str);let bin="";for(let i=0;i<b.length;i+=0x8000)bin+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(bin);}
+function b64dec(s){const bin=atob(String(s).replace(/\s/g,""));const b=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)b[i]=bin.charCodeAt(i);return new TextDecoder().decode(b);}
+async function ghRead(c){
+  const r=await call(c,fileUrl(c));
+  if(r.status===404){
+    const e=await errOf(r);
+    /* file not created yet, or a brand-new empty repo: both mean "start fresh" */
+    if(/not found|empty/i.test(e.message)){
+      const rr=await call(c,repoUrl(c));            /* make sure the repo itself is reachable */
+      if(!rr.ok)throw await errOf(rr);
+      return {sha:null,data:null};
+    }
+    throw e;
+  }
+  if(!r.ok)throw await errOf(r);
+  const j=await r.json();
+  let text="";
+  if(j.encoding==="base64"&&j.content)text=b64dec(j.content);
+  else if(j.size>0){ /* over 1 MB: ask for the raw file */
+    const rr=await call(c,fileUrl(c),{headers:{"Accept":"application/vnd.github.raw+json"}});
+    if(!rr.ok)throw await errOf(rr);
+    text=await rr.text();
+  }
+  if(!text.trim())return {sha:j.sha,data:null};
+  try{return {sha:j.sha,data:JSON.parse(text)};}
+  catch(e){const x=new Error(`${c.path} in GitHub isn’t valid JSON. Fix or delete it, then sync again.`);x.kind="badfile";throw x;}
+}
+async function ghWrite(c,data,sha){
+  const body={message:"Update One-Sided Users data",content:b64enc(JSON.stringify(data,null,1))};
+  if(sha)body.sha=sha;
+  const r=await call(c,fileUrl(c),{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  if(r.ok){const j=await r.json();return {sha:j.content&&j.content.sha};}
+  const e=await errOf(r);
+  if(r.status===409||(r.status===422&&/sha/i.test(e.message)))e.conflict=true;  /* another device saved first */
+  throw e;
+}
+function explain(e){
+  const m=(e&&e.message)||"";
+  if(e&&e.kind==="badfile")return m;
+  if(e instanceof TypeError||!e.status)return "Couldn’t reach GitHub. Check your connection, then tap Sync now.";
+  if(e.status===401)return "GitHub didn’t accept the token. It may have expired or been copied incompletely. Disconnect, then connect again with a new token.";
+  if(e.status===403&&/rate limit/i.test(m))return "GitHub is limiting requests right now. Wait a few minutes, then tap Sync now.";
+  if(e.status===403)return "The token can read this repo but can’t save to it. Edit the token on GitHub and set Contents to Read and write.";
+  if(e.status===404)return `Couldn’t find ${gh?gh.owner+"/"+gh.repo:"that repo"}, or the token wasn’t given access to it.`;
+  return "GitHub said: "+m;
+}
+
+/* read GitHub's copy, merge in this device's changes, write back if anything differs */
+async function sync(){
+  if(!gh)return;
+  if(syncing){again=true;return;}
+  syncing=true;again=false;clearTimeout(syncTimer);
+  ghState="syncing";setSync();
+  const c=gh;
+  try{
+    for(let attempt=0;;attempt++){
+      const startRev=rev,resetSnap=marksReset;
+      const remote=await ghRead(c);
+      if(gh!==c)return;
+      const R=remote.data&&typeof remote.data==="object"?remote.data:{};
+      const rCur=R.current&&Array.isArray(R.current.users)?R.current:null;
+      const cl=Math.max(clearedAt,Number(R.clearedAt)||0);
+      /* newest import wins, unless the list was cleared after it */
+      let best=[cur,rCur].filter(Boolean).sort((a,b)=>stamp(b)-stamp(a))[0]||null;
+      if(best&&stamp(best)<=cl)best=null;
+      /* marks: GitHub's copy, with this device's unsynced changes on top */
+      const snap=new Map(dirty);
+      let m=resetSnap?new Map():remote.data?readMarks(R.marks):new Map(marks);
+      snap.forEach((v,k)=>{if(v.s==="todo")m.delete(k);else m.set(k,v);});
+      if(!best)m=new Map();
+      const out={app:"one-sided-users",v:1,current:best,clearedAt:cl,marks:marksList(m)};
+      const key=x=>JSON.stringify([x.current||null,Number(x.clearedAt)||0,marksList(readMarks(x.marks))]);
+      const before=JSON.stringify([stamp(cur),marksList(marks),clearedAt]);
+      applyCurrent(best);marks=m;clearedAt=cl;
+      const after=JSON.stringify([stamp(cur),marksList(marks),clearedAt]);
+      if(!remote.data||key(R)!==key(out)){
+        out.updatedAt=new Date().toISOString();
+        try{await ghWrite(c,out,remote.sha);}
+        catch(e){if(e.conflict&&attempt<3)continue;throw e;}
+      }
+      snap.forEach((v,k)=>{if(dirty.get(k)===v)dirty.delete(k);});
+      if(marksReset===resetSnap)marksReset=0;
+      if(rev!==startRev)again=true;
+      lastSync=Date.now();ghErr="";ghState=again?"pending":"ok";
+      saveLocal();
+      try{if(before!==after)render();else if(cur)renderTiles();}catch(e){}
+      break;
+    }
+  }catch(e){
+    if(gh===c){ghErr=explain(e);ghState="error";}
+  }finally{
+    syncing=false;setSync();renderSyncCard();
+    if(again&&gh&&ghState!=="error")syncTimer=setTimeout(sync,800);
+  }
+}
+function setSync(){
+  const el=$("sync"),tx=$("syncText");
+  el.className="sync";
+  if(!gh){tx.textContent="This device · Set up sync";}
+  else if(ghState==="error"){el.classList.add("off");tx.textContent="Sync problem";}
+  else if(ghState==="syncing"){el.classList.add("saving");tx.textContent="Syncing with GitHub";}
+  else if(ghState==="pending"){el.classList.add("saving");tx.textContent="Waiting to sync";}
+  else tx.textContent="Synced with GitHub";
+  $("footNote").textContent=gh
+    ?`Your list and marks sync through ${gh.owner}/${gh.repo} on GitHub. Your Instagram files never leave your device.`
+    :"Your list and marks are saved in this browser on this device. Your Instagram files never leave your device.";
+}
+
+/* sync settings panel */
+let publicOk="";
+function syncMsg(kind,text){$("syncMsg").innerHTML=text?`<div class="msg ${kind||""}">${esc(text)}</div>`:"";}
+function renderSyncCard(){
+  const on=!!gh;
+  $("syncForm").hidden=on;$("syncOn").hidden=!on;
+  if(on){
+    $("syncWhere").innerHTML=`<b>${esc(gh.owner)}/${esc(gh.repo)}</b> · ${esc(gh.path)}`;
+    $("syncWhen").textContent=ghState==="syncing"?"Syncing now…":lastSync?"Last synced "+new Date(lastSync).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}):"Not synced yet";
+    $("syncFile").href=fileWeb(gh);
+    if(ghState==="error")syncMsg("err",ghErr);
+    else if($("syncMsg").querySelector(".err"))syncMsg("","");
+  }
+}
+function openSync(open){
+  $("syncCard").hidden=!open;
+  $("sync").setAttribute("aria-expanded",String(open));
+  if(open){renderSyncCard();$("syncCard").scrollIntoView({behavior:"smooth",block:"start"});if(!gh)setTimeout(()=>$("gOwner").focus(),300);}
+}
+async function connectGh(){
+  let owner=$("gOwner").value.trim().replace(/^@/,""),repo=$("gRepo").value.trim(),path=$("gPath").value.trim().replace(/^\/+/,"")||"one-sided-users.json";
+  const token=$("gToken").value.trim();
+  const m=repo.match(/(?:github\.com\/)?([^\/\s]+)\/([^\/\s]+?)(?:\.git)?\/?$/i);
+  if(repo.includes("/")&&m){owner=owner||m[1];repo=m[2];}
+  if(!/^[A-Za-z0-9-]{1,39}$/.test(owner))return syncMsg("err","Enter your GitHub username.");
+  if(!/^[A-Za-z0-9._-]{1,100}$/.test(repo))return syncMsg("err","Enter the repository name, for example blyssful-data.");
+  if(!/^[A-Za-z0-9._ \/-]+\.json$/.test(path)||/(^|\/)\.\.(\/|$)/.test(path))return syncMsg("err","The data file name needs to end in .json, for example one-sided-users.json.");
+  if(!/^\S{20,}$/.test(token))return syncMsg("err","Paste the access token from GitHub. It starts with github_pat_.");
+  const c={owner,repo,path,token};
+  const b=$("gConnect");b.disabled=true;b.textContent="Checking…";syncMsg("","");
+  try{
+    const r=await call(c,repoUrl(c));
+    if(!r.ok)throw await errOf(r);
+    const j=await r.json();
+    if(j.private===false&&publicOk!==owner+"/"+repo){
+      publicOk=owner+"/"+repo;
+      syncMsg("err",`${owner}/${repo} is a public repo, so anyone could read your list in it. Use a private repo, or tap the button again to use this one anyway.`);
+      b.textContent="Use this public repo anyway";b.disabled=false;return;
+    }
+    gh=c;saveCfg();$("gToken").value="";publicOk="";
+    syncMsg("ok","Connected. Your list now syncs through this repo.");
+    renderSyncCard();await sync();
+  }catch(e){
+    syncMsg("err",e.status===404?`Couldn’t find ${owner}/${repo}, or the token wasn’t given access to it.`
+      :e.status===401?"GitHub didn’t accept that token. Check that you copied all of it and that it hasn’t expired."
+      :explain(e));
+  }finally{b.disabled=false;if(b.textContent==="Checking…")b.textContent="Connect";}
+}
+
+/* ---------- formatting ---------- */
+function fmtDate(t){if(!t)return "—";return new Date(t*1000).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"});}
+function fmtStamp(ms){return new Date(ms).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});}
+function fmtDur(t){
+  if(!t)return "—";
+  const a=new Date(t*1000),b=new Date();
+  let m=(b.getFullYear()-a.getFullYear())*12+(b.getMonth()-a.getMonth());
+  if(b.getDate()<a.getDate())m--;
+  if(m>=12){const y=Math.floor(m/12),r=m%12;return y+" yr"+(r?" "+r+" mo":"");}
+  if(m>=1)return m+" mo";
+  const d=Math.max(0,Math.floor((b-a)/86400000));
+  return d===0?"Today":d===1?"1 day":d+" days";
+}
+const statusOf=u=>{const v=marks.get(u.toLowerCase());return v?v.s:"todo";};
+function fmtMs(ms,opt){return ms?new Date(ms).toLocaleDateString("en-US",opt||{month:"short",day:"numeric",year:"numeric"}):"—";}
+function fmtRange(a,b){const sameY=new Date(a).getFullYear()===new Date(b).getFullYear();return fmtMs(a,sameY?{month:"short",day:"numeric"}:undefined)+" – "+fmtMs(b);}
+
+/* ---------- render ---------- */
+function render(){
+  $("loading").hidden=loaded;
+  const has=!!cur;
+  const hh=!!(cur&&cur.hist&&!cur.hist.noBase&&Array.isArray(cur.hist.followers));
+  $("results").hidden=!has||curView!=="users";
+  $("histView").hidden=curView!=="history"||!hh;
+  $("histEmpty").hidden=curView!=="history"||hh;
+  $("clearBtn").hidden=!has;
+  $("impToggle").hidden=!has;
+  if(has){
+    $("impEyebrow").textContent="Last import";
+    $("impTitle").textContent=fmtStamp(cur.importedAt);
+    $("impMeta").textContent=(cur.exportAt?"Exported "+fmtMs(cur.exportAt)+" · ":"")+(cur.files&&cur.files.length?cur.files.join(" + ")+" · ":"")+"Import a fresh download any time to update everything.";
+    if(!impOpenUser)$("impBody").hidden=true;
+  }else{
+    $("impEyebrow").textContent="Step 1";
+    $("impTitle").textContent="Import your Instagram files";
+    $("impMeta").textContent="Your files are read on this device. Only the one-sided list and your marks are saved.";
+    $("impBody").hidden=false;
+  }
+  $("impToggle").setAttribute("aria-expanded",String(!$("impBody").hidden));
+  $("impToggle").textContent=$("impBody").hidden?"Import new files":"Hide import";
+  if(!has)return;
+  if(curView==="users"){renderTiles();renderList();}
+  else if(hh)renderHistory();
+}
+function renderTiles(){
+  let keep=0,done=0;
+  cur.users.forEach(u=>{const s=statusOf(u.u);if(s==="keep")keep++;else if(s==="done")done++;});
+  const todo=cur.users.length-keep-done;
+  const pct=cur.following?Math.round(cur.mutual/cur.following*100):0;
+  const T=(c,k,v,d)=>`<div class="tile ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`;
+  $("tiles").innerHTML=
+    T("t-blue","Following",fmtN(cur.following),"accounts you follow")+
+    T("t-sky","Followers",fmtN(cur.followers),"accounts that follow you")+
+    T("t-olive","Mutuals",fmtN(cur.mutual),pct+"% follow you back")+
+    T("t-pink","One-sided",fmtN(cur.users.length),lostOnList()?fmtN(lostOnList())+" unfollowed you":freshSet.size?fmtN(freshSet.size)+" new since last import":"don’t follow you back")+
+    T("t-orange","To review",fmtN(todo),keep?fmtN(keep)+" marked keep":"not marked yet")+
+    T("t-green","Unfollowed",fmtN(done),"marked done");
+  $("cAll").textContent=fmtN(cur.users.length);
+  $("cTodo").textContent=fmtN(todo);
+  $("cKeep").textContent=fmtN(keep);
+  $("cDone").textContent=fmtN(done);
+  $("listEyebrow").textContent="From your "+new Date(cur.importedAt).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})+" import";
+}
+function goneMap(){const m=new Map();if(cur&&cur.hist&&Array.isArray(cur.hist.gone))cur.hist.gone.forEach(x=>m.set(x.u.toLowerCase(),x));return m;}
+function lostOnList(){const g=goneMap();return cur.users.filter(u=>g.has(u.u.toLowerCase())).length;}
+function filtered(){
+  const q=view.q.trim().toLowerCase().replace(/^@/,"");
+  let l=cur.users.filter(u=>{
+    if(q&&!u.u.toLowerCase().includes(q))return false;
+    if(view.f!=="all"&&statusOf(u.u)!==view.f)return false;
+    return true;
+  });
+  const d=view.dir;
+  l.sort(view.sort==="u"
+    ?(a,b)=>d*a.u.localeCompare(b.u)
+    :(a,b)=>d*((a.t||Infinity)-(b.t||Infinity))||a.u.localeCompare(b.u));
+  return l;
+}
+function renderList(){
+  const l=filtered();const shown=l.slice(0,view.limit);
+  $("msort").value=view.sort+":"+view.dir;
+  document.querySelectorAll("th .sort").forEach(b=>{
+    const on=b.dataset.sort===view.sort;b.classList.toggle("on",on);
+    b.querySelector(".arr").textContent=on&&view.dir<0?"▼":"▲";
+    b.closest("th").setAttribute("aria-sort",on?(view.dir>0?"ascending":"descending"):"none");
+  });
+  const gm=goneMap();
+  $("rows").innerHTML=shown.map((u,i)=>{
+    const s=statusOf(u.u);const k=u.u.toLowerCase();const g=gm.get(k);const mk=marks.get(k);
+    const href="https://www.instagram.com/"+encodeURIComponent(u.u)+"/";
+    return `<tr class="${s==="done"?"is-done":""}">
+      <td class="num c-num">${i+1}</td>
+      <td class="c-user"><span class="user"><a href="${href}" target="_blank" rel="noopener"><span class="at">@</span>${esc(u.u)}</a>${g?`<span class="pill lostp" title="Unfollowed you between ${fmtRange(g.a,g.b)}">Unfollowed you</span>`:freshSet.has(k)?'<span class="pill new" title="Not on your last import’s list">New</span>':""}</span></td>
+      <td class="dt">${fmtDate(u.t)}<span class="m-dur">${u.t?" · "+fmtDur(u.t):""}</span></td>
+      <td class="dur c-dur">${fmtDur(u.t)}</td>
+      <td class="c-open"><a class="open-btn" href="${href}" target="_blank" rel="noopener" aria-label="Open @${esc(u.u)} on Instagram"><span class="lbl">Open</span> ↗</a></td>
+      <td class="c-stat"><select class="pick s-${s}" data-u="${esc(k)}" aria-label="Status for @${esc(u.u)}">
+        <option value="todo"${s==="todo"?" selected":""}>To review</option>
+        <option value="keep"${s==="keep"?" selected":""}>Keep</option>
+        <option value="done"${s==="done"?" selected":""}>Unfollowed</option>
+      </select>${s==="done"&&mk&&mk.d?`<small class="md">${fmtMs(mk.d,{month:"short",day:"numeric"})}</small>`:""}</td>
+    </tr>`;
+  }).join("");
+  const em=$("empty");
+  if(!l.length){
+    em.hidden=false;
+    em.textContent=!cur.users.length?"Everyone you follow follows you back.":view.q?"No usernames match your search.":view.f==="todo"?"Nothing left to review. Nice work.":view.f==="keep"?"No accounts marked Keep yet.":"No accounts marked Unfollowed yet.";
+  }else em.hidden=true;
+  $("showing").textContent=l.length?`Showing ${fmtN(shown.length)} of ${fmtN(l.length)}`:"";
+  $("more").hidden=shown.length>=l.length;
+}
+
+/* ---------- follow history ---------- */
+let hv={f:"all",q:"",limit:PAGE};
+function histEvents(){
+  const h=cur.hist,ev=[];
+  const newF=new Set(h.newF||[]);
+  const oneSided=new Set(cur.users.map(x=>x.u.toLowerCase()));
+  const nowF=new Set(h.followers.map(x=>x.u.toLowerCase()));
+  h.followers.forEach(x=>{const k=x.u.toLowerCase();ev.push({type:"f",u:x.u,k,at:(x.t||0)*1000,isNew:newF.has(k)});});
+  h.gone.forEach(x=>{const k=x.u.toLowerCase();ev.push({type:"lost",u:x.u,k,at:x.b,a:x.a,since:(x.t||0)*1000,still:oneSided.has(k),back:nowF.has(k)});});
+  const ig=new Set();
+  (h.youUnf||[]).forEach(x=>{const k=x.u.toLowerCase();ig.add(k);ev.push({type:"you",u:x.u,k,at:x.d,src:"from Instagram"});});
+  marks.forEach((v,k)=>{if(v.s==="done"&&!ig.has(k))ev.push({type:"you",u:k,k,at:v.d||0,src:"marked here"});});
+  ev.sort((a,b)=>(b.at||0)-(a.at||0)||a.k.localeCompare(b.k));
+  return ev;
+}
+const EVP={f:'<span class="pill ev ev-f">Followed you</span>',lost:'<span class="pill ev ev-lost">Unfollowed you</span>',you:'<span class="pill ev ev-you">You unfollowed</span>'};
+function renderHistory(){
+  const h=cur.hist,ev=histEvents();
+  const base=h.snaps.length<=1,last=h.snaps[h.snaps.length-1]||{};
+  const cnt={f:0,lost:0,you:0};ev.forEach(e=>cnt[e.type]++);
+  const T=(c,k,v,d)=>`<div class="tile ${c}"><span class="k">${k}</span><span class="v">${v}</span><span class="d">${d}</span></div>`;
+  $("hTiles").innerHTML=
+    T("t-sky","Followers",fmtN(cur.followers),"as of "+fmtMs(h.exportAt))+
+    T("t-green","New followers",base?"—":"+"+fmtN(last.gained),base?"shows after your next import":"since your last export")+
+    T("t-pink","Unfollowed you",base?"—":fmtN(last.lost),base?"shows after your next import":"since your last export")+
+    T("t-orange","All unfollows",fmtN(h.gone.length),"since "+fmtMs(h.firstAt))+
+    T("t-blue","You unfollowed",fmtN(cnt.you),"recorded")+
+    T("t-olive","Imports",fmtN(h.snaps.length),"tracking since "+fmtMs(h.firstAt));
+  $("hcAll").textContent=fmtN(ev.length);$("hcF").textContent=fmtN(cnt.f);$("hcLost").textContent=fmtN(cnt.lost);$("hcYou").textContent=fmtN(cnt.you);
+  $("hEyebrow").textContent="Tracking since "+fmtMs(h.firstAt)+" · latest export "+fmtMs(h.exportAt);
+  const q=hv.q.trim().toLowerCase().replace(/^@/,"");
+  const l=ev.filter(e=>(hv.f==="all"||e.type===hv.f)&&(!q||e.k.includes(q)));
+  const shown=l.slice(0,hv.limit);
+  $("hRows").innerHTML=shown.map(e=>{
+    const href="https://www.instagram.com/"+encodeURIComponent(e.u)+"/";
+    let when,sub="",det="";
+    if(e.type==="f"){when=e.at?fmtMs(e.at):"Date not in export";sub=e.at?"following you "+fmtDur(e.at/1000):"";}
+    else if(e.type==="lost"){
+      when=fmtRange(e.a,e.at);sub="between exports";
+      det=(e.since?"Had followed you since "+fmtMs(e.since):"")+
+        (e.still?'<br><span class="pill tag tag-still">You still follow them</span>':"")+
+        (e.back?'<br><span class="pill tag tag-back">Followed you again later</span>':"");
+    }else{when=e.at?fmtMs(e.at):"Date unknown";sub=e.src;}
+    return `<tr>
+      <td class="c-user"><span class="user"><a href="${href}" target="_blank" rel="noopener"><span class="at">@</span>${esc(e.u)}</a>${e.isNew?'<span class="pill new" title="New since your last export">New</span>':""}</span></td>
+      <td class="c-ev">${EVP[e.type]}</td>
+      <td class="dt">${when}${sub?`<small>${esc(sub)}</small>`:""}</td>
+      <td class="c-det">${det}</td>
+      <td class="c-open"><a class="open-btn" href="${href}" target="_blank" rel="noopener" aria-label="Open @${esc(e.u)} on Instagram"><span class="lbl">Open</span> ↗</a></td>
+    </tr>`;
+  }).join("");
+  const em=$("hEmpty");
+  if(!l.length){
+    em.hidden=false;
+    em.textContent=hv.q?"No usernames match your search.":hv.f==="lost"?(base?"Unfollows show up after your next import.":"Nobody has unfollowed you between your imports."):hv.f==="you"?"No unfollows recorded yet. Mark people Unfollowed on the One-Sided Users tab, or include recently_unfollowed_profiles.json in an import.":"Nothing recorded yet.";
+  }else em.hidden=true;
+  $("hShowing").textContent=l.length?`Showing ${fmtN(shown.length)} of ${fmtN(l.length)}`:"";
+  $("hMore").hidden=shown.length>=l.length;
+  $("logRows").innerHTML=h.snaps.slice().reverse().map(x=>`<tr>
+    <td>${fmtMs(x.at)}${x.base?' <span class="muted">· first import</span>':""}</td>
+    <td class="r">${fmtN(x.followers)}</td><td class="r">${fmtN(x.following)}</td>
+    <td class="r ${x.gained?"up":""}">${x.base?"—":"+"+fmtN(x.gained)}</td>
+    <td class="r ${x.lost?"down":""}">${x.base?"—":fmtN(x.lost)}</td></tr>`).join("");
+}
+
+/* ---------- pages ---------- */
+let curView="users";
+const HEADS={
+  users:{e:"Instagram · Follow-back check",t:'One-Sided <span class="hl">Users</span>',s:"Accounts you follow that don’t follow you back. Import your Instagram download, then work down the list: open a profile, unfollow, and mark it here."},
+  history:{e:"Instagram · Follower tracking",t:'Follow <span class="hl">History</span>',s:"Every follow and unfollow your imports have recorded. Follows carry the exact date from Instagram. Unfollows show the window between two exports, so importing more often narrows it down."}
+};
+function showView(v){
+  curView=v==="history"?"history":"users";
+  document.querySelectorAll("nav.pages a[data-view]").forEach(a=>{if(a.dataset.view===curView)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current");});
+  const hd=HEADS[curView];$("phEyebrow").textContent=hd.e;$("phTitle").innerHTML=hd.t;$("phSub").textContent=hd.s;
+  render();
+}
+
+/* ---------- import UI ---------- */
+let impOpenUser=false;
+function setImpOpen(open){impOpenUser=open;$("impBody").hidden=!open&&!!cur;render();}
+function setMsg(notes){
+  const box=$("impMsg");
+  if(!notes||!notes.length){box.innerHTML="";return;}
+  const errs=notes.filter(n=>n.err),oks=notes.filter(n=>n.ok),info=notes.filter(n=>!n.err&&!n.ok);
+  let h="";
+  if(oks.length)h+=`<div class="msg ok">${oks.map(n=>esc(n.t)).join("<br>")}</div>`;
+  if(info.length)h+=`<div class="msg">${info.map(n=>esc(n.t)).join("<br>")}</div>`;
+  if(errs.length)h+=`<div class="msg err">${errs.length===1?esc(errs[0].t):"<ul>"+errs.map(n=>"<li>"+esc(n.t)+"</li>").join("")+"</ul>"}</div>`;
+  box.innerHTML=h;
+}
+function renderChips(){
+  const c=$("fileChips");
+  if(!stage){c.innerHTML="";return;}
+  const chip=(ok,label,n)=>`<span class="fchip${ok?" ok":""}">${ok?"✓":"○"} ${label}${ok?` <b>${fmtN(n)}</b>`:""}</span>`;
+  c.innerHTML=chip(!!stage.following,"Following",stage.following&&stage.following.size)+chip(!!stage.followers,"Followers",stage.followers&&stage.followers.size)+(stage.unf?chip(true,"You unfollowed",stage.unf.size):"");
+}
+
+/* ---------- events ---------- */
+$("pick").addEventListener("click",()=>$("fileIn").click());
+$("fileIn").addEventListener("change",e=>{const f=e.target.files;handleFiles(f).finally(()=>{e.target.value="";});});
+const drop=$("drop");
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over");}));
+["dragleave","dragend"].forEach(ev=>drop.addEventListener(ev,()=>drop.classList.remove("over")));
+drop.addEventListener("drop",e=>{e.preventDefault();drop.classList.remove("over");if(e.dataTransfer&&e.dataTransfer.files)handleFiles(e.dataTransfer.files);});
+window.addEventListener("dragover",e=>e.preventDefault());
+window.addEventListener("drop",e=>e.preventDefault());
+$("impToggle").addEventListener("click",()=>{const open=$("impBody").hidden;setImpOpen(open);if(!open){setMsg([]);stage=null;renderChips();}});
+
+$("q").addEventListener("input",e=>{view.q=e.target.value;view.limit=PAGE;renderList();});
+$("filt").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-f]");if(!b)return;
+  view.f=b.dataset.f;view.limit=PAGE;
+  $("filt").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  renderList();
+});
+document.querySelector("thead").addEventListener("click",e=>{
+  const b=e.target.closest(".sort");if(!b)return;
+  if(view.sort===b.dataset.sort)view.dir=-view.dir;else{view.sort=b.dataset.sort;view.dir=1;}
+  renderList();
+});
+$("msort").addEventListener("change",e=>{const [k,d]=e.target.value.split(":");view.sort=k;view.dir=Number(d);view.limit=PAGE;renderList();});
+$("more").addEventListener("click",()=>{view.limit+=PAGE;renderList();});
+$("hq").addEventListener("input",e=>{hv.q=e.target.value;hv.limit=PAGE;renderHistory();});
+$("hfilt").addEventListener("click",e=>{
+  const b=e.target.closest("button[data-h]");if(!b)return;
+  hv.f=b.dataset.h;hv.limit=PAGE;
+  $("hfilt").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));
+  renderHistory();
+});
+$("hMore").addEventListener("click",()=>{hv.limit+=PAGE;renderHistory();});
+window.addEventListener("hashchange",()=>showView(location.hash.slice(1)));
+$("rows").addEventListener("change",e=>{
+  const s=e.target.closest("select.pick");if(!s)return;
+  const k=s.dataset.u,v=s.value,val={s:v,d:Date.now()};
+  if(v==="todo")marks.delete(k);else marks.set(k,val);
+  dirty.set(k,val);changed(2500);
+  const md=s.parentNode.querySelector(".md");if(md)md.remove();
+  if(v==="done")s.insertAdjacentHTML("afterend",`<small class="md">${fmtMs(val.d,{month:"short",day:"numeric"})}</small>`);
+  s.className="pick s-"+v;
+  const tr=s.closest("tr");tr.classList.toggle("is-done",v==="done");
+  renderTiles();
+  /* keep the row in place while filtering so the tap doesn't jump; it leaves on the next redraw */
+});
+let armT=null;
+$("clearBtn").addEventListener("click",e=>{
+  const b=e.currentTarget;
+  if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Tap again to clear everything";clearTimeout(armT);armT=setTimeout(()=>{b.classList.remove("armed");b.textContent="Clear all data";},4000);return;}
+  clearTimeout(armT);b.classList.remove("armed");b.textContent="Clear all data";
+  cur=null;freshSet=new Set();marks=new Map();stage=null;impOpenUser=false;
+  clearedAt=Date.now();marksReset=clearedAt;dirty=new Map();changed(300);
+  setMsg([]);renderChips();render();
+});
+
+$("sync").addEventListener("click",()=>openSync($("syncCard").hidden));
+$("syncClose").addEventListener("click",()=>openSync(false));
+$("syncForm").addEventListener("submit",e=>{e.preventDefault();connectGh();});
+$("gRepo").addEventListener("input",()=>{publicOk="";$("gConnect").textContent="Connect";});
+$("syncNow").addEventListener("click",()=>{syncMsg("","");sync();});
+let disT=null;
+$("syncOff").addEventListener("click",e=>{
+  const b=e.currentTarget;
+  if(!b.classList.contains("armed")){b.classList.add("armed");b.textContent="Tap again to disconnect";clearTimeout(disT);disT=setTimeout(()=>{b.classList.remove("armed");b.textContent="Disconnect this device";},4000);return;}
+  clearTimeout(disT);b.classList.remove("armed");b.textContent="Disconnect this device";
+  gh=null;ghState="off";ghErr="";saveCfg();clearTimeout(syncTimer);
+  syncMsg("ok","Disconnected. This device keeps its copy of the list; the file in GitHub is untouched.");
+  setSync();renderSyncCard();
+});
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&gh&&!syncing)sync();});
+window.addEventListener("pagehide",()=>{if(gh&&ghState==="pending")sync();});
+
+loadCfg();loadLocal();showView(location.hash.slice(1));setSync();renderSyncCard();
+if(gh)sync();
+})();
+</script>
+</body>
+</html>
