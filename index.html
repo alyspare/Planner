@@ -984,7 +984,7 @@ main.sw-r{animation:swInR .24s ease-out}
 @media (max-width:560px){ .pp-row{grid-template-columns:minmax(0,1fr) auto} .pp-s{display:none} }
 
 /* dating: person colors + summary */
-.cat-ico.ci-dating.pc{background:var(--pc);color:var(--pg);box-shadow:0 0 0 1px color-mix(in srgb, var(--pc) 65%, #000),0 0 6px color-mix(in srgb, var(--pc) 55%, transparent)}
+.cat-ico.ci-community.pc,.cat-ico.ci-dating.pc{background:var(--pc);color:var(--pg);box-shadow:0 0 0 1px color-mix(in srgb, var(--pc) 65%, #000),0 0 6px color-mix(in srgb, var(--pc) 55%, transparent)}
 .dz-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;box-shadow:0 0 0 1.5px rgba(255,255,255,.85)}
 .dz-swatches{display:flex;flex-wrap:wrap;gap:6px}
 .dz-sw{display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 10px 0 6px;border:1px solid var(--line);border-radius:999px;background:#fff;font:inherit;font-size:12.5px;font-weight:600;color:var(--ink);cursor:pointer}
@@ -994,6 +994,32 @@ main.sw-r{animation:swInR .24s ease-out}
 .dz-sw.custom input[type=color]::-webkit-color-swatch-wrapper{padding:0}
 .dz-sw.custom input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
 .dz-sum-meta{margin:0 0 8px;font-size:12px;color:var(--muted)}
+/* community: person cards by category, check-in details */
+.cm-hint{margin:2px 2px 0}
+.cm-add .cm-rhyn .ctl{width:92px}
+.cm-groups{margin:4px 0 6px}
+.cm-ghead{margin-top:18px;align-items:center}
+.cm-ghead .pv-btn{margin-left:auto}
+.cm-grid{margin-bottom:6px}
+.cm-empty{grid-column:1/-1;margin:0;padding:14px 16px;border:1.5px dashed rgba(255,255,255,.5);border-radius:14px;color:var(--on-bg);font-size:13.5px}
+.cm-next{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.cm-next .ppl-status,.cm-dnext .ppl-status{padding:0;font-size:14px;white-space:normal}
+.cm-log{height:30px}
+.cm-card .dz-grip:hover,.cm-card .dz-grip:focus-visible{color:var(--community-mid)}
+.cm-card.dz-dragging{outline-color:var(--community-mid)}
+.cm-flash{animation:cmFlash 1.8s ease-out}
+@keyframes cmFlash{0%{box-shadow:0 0 0 5px #fff}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.cm-dnext{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.cm-every{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+.cm-every .ctl{width:92px}
+.cm-sub{display:block;width:100%;margin-top:4px;font-size:12px}
+.cm-chips .dz-chip[aria-pressed="true"]{background:var(--community-fg);border-color:var(--community-fg);color:#fff}
+.cm-plink{font-size:inherit;letter-spacing:inherit;color:inherit;text-decoration-thickness:2px;text-underline-offset:3px}
+.ci-status{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;border-radius:12px;background:var(--community-bg);color:var(--community-fg);font-size:14px;margin:2px 0 14px}
+.ci-status.ok{background:var(--ok-bg);color:var(--ok-fg)}
+.ci-status.late{background:var(--warn-bg);color:var(--warn-fg)}
+.ci-from{margin:-6px 0 12px}
+.ci-follow{margin:4px 0 0}
 .dz-entsec h3 span{font-weight:600;color:var(--muted);font-size:12px;margin-left:4px}
 .dz-elist{list-style:none;margin:0;padding:0}
 .dz-elist li+li{border-top:1px solid var(--line)}
@@ -1227,7 +1253,7 @@ var KINDS = {
   post:{label:'Content post', code:'POST'}, project:{label:'Project', code:'DUE'}, bill:{label:'Bill', code:'$$'},
   income:{label:'Income', code:'$$'}, expense:{label:'Expense', code:'$$'}, debt:{label:'Debt', code:'$$'},
   event:{label:'Event', code:'EVENT'}, person:{label:'Person', code:'CHECK-IN'}, cpost:{label:'Content Calendar post', code:'POST'},
-  dentry:{label:'Dating entry', code:'DATING'}
+  dentry:{label:'Dating entry', code:'DATING'}, checkin:{label:'Check-in', code:'CHECK-IN'}
 };
 var DZ_TYPES = ['In-Person','Text','Phone Call','FaceTime','Socials'];
 var DZ_MARKS = ['No Text Back','No Show','Last Time Seen','Last Time Spoken','Date','Gifts Given','Gifts Received','Red Light Special'];
@@ -1258,8 +1284,13 @@ var DAY_ADD = [
   ['goal','Yearly goal'],['trip','Trip (starts this day)'],['post','Content idea (this planner)'],['project','Work project / deadline'],
   ['bill','Bill (due this day)'],['income','Pay day / income'],['expense','Expense (spent this day)']
 ];
-var RHYTHM = [['7','Every week'],['14','Every 2 weeks'],['30','Every month'],['60','Every 2 months'],['90','Every 3 months'],['182','Twice a year'],['365','Once a year']];
-var PGROUPS = ['Family','Close friends','Friends','Work friends','Community','Other'];
+var RHYTHM = [['1','Every day'],['2','Bi-daily · every 2 days'],['7','Every week'],['14','Every 2 weeks'],['30','Every month'],['60','Every 2 months'],['90','Every 3 months'],['182','Twice a year'],['365','Once a year']];
+var RHYTHM_C = RHYTHM.concat([['c','Custom number of days…']]);
+var RHY_NUMS = (function(){ var a = []; for(var i = 1; i <= 365; i++) a.push([String(i), String(i)]); return a; })();
+var PGROUPS = ['Family','Close Friends','Friends','Community','Work Friends','Other'];
+var CI_TYPES = ['Call','Voice Memo','Text','FaceTime','Visit','Card/Gift','Social Media','In-Person','Other'];
+var CI_OLD = {'Video call':'FaceTime', 'Card or gift':'Card/Gift', 'Social media':'Social Media'};
+var CI_MOODS = [['Happy','😊'],['Excited','🤩'],['Grateful','🙏'],['Loved','🥰'],['Calm','😌'],['Proud','💪'],['Hopeful','🌱'],['Busy','📅'],['Tired','😴'],['Stressed','😣'],['Anxious','😟'],['Overwhelmed','😵‍💫'],['Sad','😢'],['Lonely','🥺'],['Frustrated','😤'],['Sick','🤒'],['Grieving','💔']];
 var METHODS = ['Call','Text','Video call','Visit','Card or gift','Social media','Other'];
 var CP_URL = 'https://claude.ai/artifact/ELXGWDWRfWoaL3LaCp7D2t';
 var CP_STATUSES = ['Idea','Drafting','In Progress','Scheduled','Published'];
@@ -1385,9 +1416,31 @@ function normalize(d){
     }
     if(it.kind === 'income'){ if(!it.received || typeof it.received !== 'object') it.received = {}; it.source = it.source || 'General'; if(it.recurring !== 'no') it.recurring = 'yes'; it.freq = it.freq || 'biweekly'; }
     if(it.kind === 'debt'){ if(!it.paid || typeof it.paid !== 'object') it.paid = {}; it.freq = it.freq || 'monthly'; it.recurring = 'yes'; }
-    if(it.kind === 'person') it.logs = Array.isArray(it.logs) ? it.logs.filter(function(l){ return l && validISO(l.date); }) : [];
+    if(it.kind === 'person'){ it.logs = Array.isArray(it.logs) ? it.logs.filter(function(l){ return l && validISO(l.date); }) : [];
+      it.group = cmGroupNorm(it.group); it.rhythm = String(cmRhythm(it)); it.rhyC = !!x.rhyC; it.color = /^#[0-9a-fA-F]{6}$/.test(x.color || '') ? x.color : '';
+      ['favColor','favFood','contact'].forEach(function(k){ it[k] = String(x[k] || ''); }); it.lastSeen = validISO(x.lastSeen) ? x.lastSeen : ''; it.birthday = validISO(x.birthday) ? x.birthday : ''; it.ord = isFinite(+x.ord) ? +x.ord : 0; }
+    if(it.kind === 'checkin'){ it.pid = String(x.pid || ''); ['types','moods'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.time = /^\d{2}:\d{2}$/.test(x.time || '') ? x.time : ''; it.done = !!x.done; it.followId = String(x.followId || ''); it.fromId = String(x.fromId || ''); }
     if(it.kind === 'dentry'){ ['who','types','marks','feelings'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.recurring = !!x.recurring; it.issue = String(x.issue || ''); it.overall = String(x.overall || ''); it.likeness = String(x.likeness || ''); it.stayed = !!x.stayed; it.left = validISO(x.left) ? x.left : ''; }
     return it;
+  });
+  /* check-ins used to live inside each person; give each one its own entry (same id on every device) */
+  var haveId = {}; s.items.forEach(function(i){ haveId[i.id] = 1; });
+  s.items.slice().forEach(function(pp){
+    if(pp.kind !== 'person' || !pp.logs.length) return;
+    pp.logs.forEach(function(l, k){
+      var arr = function(v){ return Array.isArray(v) ? v.map(String) : []; };
+      if(l.ci){
+        /* a copy kept for older planners: bring back any check-in an older device dropped */
+        if(!l.id || haveId[l.id]) return; haveId[l.id] = 1;
+        s.items.push({id:String(l.id), kind:'checkin', name:'', date:l.date, description:'', notes:String(l.note || ''), reminder:validISO(l.reminder) ? l.reminder : '', reminderTime:String(l.reminderTime || '09:00'), remDismissed:String(l.remDismissed || ''), subtasks:[],
+          pid:pp.id, types:arr(l.types), moods:arr(l.moods), time:/^\d{2}:\d{2}$/.test(l.time || '') ? l.time : '', done:l.done !== false, followId:String(l.followId || ''), fromId:String(l.fromId || ''), created:+l.created || 0, updated:+l.updated || 0});
+        return;
+      }
+      var cid = 'ci_' + (l.id || (pp.id + '_' + l.date + '_' + k)); if(haveId[cid] || (l.id && haveId[l.id])) return; haveId[cid] = 1;
+      var ty = l.method ? [CI_OLD[l.method] || l.method] : []; if(ty.length && CI_TYPES.indexOf(ty[0]) < 0) ty = ['Other'];
+      s.items.push({id:cid, kind:'checkin', name:'', date:l.date, description:'', notes:String(l.note || '').slice(0, 500), reminder:'', reminderTime:'09:00', subtasks:[], pid:pp.id, types:ty, moods:[], time:'', done:true, followId:'', fromId:'', created:pp.created || 0});
+    });
+    pp.logs = [];
   });
   s.habits = Array.isArray(d.habits) ? d.habits.filter(function(h){ return h && h.id; }) : [];
   s.habitLog = d.habitLog && typeof d.habitLog === 'object' ? d.habitLog : {};
@@ -1425,6 +1478,7 @@ if(navigator.storage && navigator.storage.persisted){
 }
 
 function getItem(id){
+  if(D && D.draft && D.draft.id === id) return D.draft;
   for(var i=0;i<S.items.length;i++){ if(S.items[i].id === id) return S.items[i]; }
   var cp = (S.content && S.content.posts) || [];
   for(var j=0;j<cp.length;j++){ if(cp[j].id === id) return cp[j]; }
@@ -1441,6 +1495,7 @@ function catOf(it){
     case 'person': return 'community';
     case 'cpost': return 'content';
     case 'dentry': return 'dating';
+    case 'checkin': return 'community';
     default: return CATS[it.cat] && it.cat !== 'goal' && it.cat !== 'dating' ? it.cat : 'self';
   }
 }
@@ -1453,11 +1508,12 @@ function isDone(it){
     case 'project': return it.status === 'Done';
     case 'cpost': return it.status === 'Published';
     case 'debt': return num(it.balance) <= 0 && num(it.original) > 0;
+    case 'checkin': return !!it.done;
     default: return false;
   }
 }
 function goalYear(g){ return validISO(g.date) ? parse(g.date).y : (g.year || parse(today()).y); }
-function isOverdue(it){ return !isDone(it) && validISO(it.date) && it.date < today() && (it.kind === 'task' || it.kind === 'goal' || it.kind === 'project'); }
+function isOverdue(it){ return !isDone(it) && validISO(it.date) && it.date < today() && (it.kind === 'task' || it.kind === 'goal' || it.kind === 'project' || it.kind === 'checkin'); }
 
 function newItem(kind, props){
   var it = Object.assign({id:uid(), kind:kind, name:'', date:'', description:'', notes:'', subtasks:[], reminder:'', reminderTime:'09:00', created:Date.now()}, props || {});
@@ -1474,12 +1530,15 @@ function newItem(kind, props){
   if(kind === 'expense'){ it.amount = m2(it.amount); it.ecat = it.ecat || 'Shopping'; }
   if(kind === 'debt'){ it.balance = m2(it.balance); it.original = it.original ? m2(it.original) : it.balance; it.minPay = m2(it.minPay); it.apr = String(it.apr || '').trim() ? String(num(it.apr)) : ''; it.dtype = it.dtype || 'Credit card'; it.recurring = 'yes'; it.freq = it.freq || 'monthly'; it.paid = {}; it.end = ''; }
   if(kind === 'event'){ it.cat = it.cat || 'self'; it.end = ''; it.time = ''; }
-  if(kind === 'person'){ it.group = it.group || 'Friends'; it.rhythm = it.rhythm || '30'; it.birthday = it.birthday || ''; it.contact = ''; it.logs = []; }
+  if(kind === 'person'){ it.group = cmGroupNorm(it.group || 'Friends'); it.rhythm = String(cmRhythm(it)); it.rhyC = !!it.rhyC; it.birthday = it.birthday || ''; it.contact = ''; it.logs = []; it.color = ''; it.favColor = ''; it.favFood = ''; it.lastSeen = '';
+    if(!isFinite(+it.ord) || it.ord === undefined) it.ord = S.items.filter(function(q){ return q.kind === 'person' && q.group === it.group; }).reduce(function(m, q){ return Math.max(m, +q.ord || 0); }, 0) + 1; }
+  if(kind === 'checkin'){ it.pid = it.pid || ''; it.types = it.types || []; it.moods = it.moods || []; it.time = it.time || ''; it.done = !!it.done; it.followId = ''; it.fromId = it.fromId || ''; }
   if(kind === 'dentry'){ it.who = Array.isArray(it.who) ? it.who : []; it.types = []; it.marks = []; it.feelings = []; it.overall = ''; it.likeness = ''; it.recurring = false; it.issue = ''; it.stayed = false; it.left = ''; }
   S.items.push(it); save();
   return it;
 }
 function setField(it, f, v){
+  ciMaterialize(it);
   if(f === 'done'){ it.done = !!v; it.doneDate = v ? today() : ''; }
   else if(f === 'autopay'){ it.autopay = !!v; }
   else it[f] = v;
@@ -1487,12 +1546,76 @@ function setField(it, f, v){
   if(f === 'reminder' || f === 'reminderTime') it.remDismissed = '';
   it.updated = Date.now();
 }
-function removeItem(id){ S.items = S.items.filter(function(i){ return i.id !== id; }); save(); }
+function removeItem(id){
+  var ri = getItem(id);
+  S.items = S.items.filter(function(i){ return i.id !== id && !(ri && ri.kind === 'person' && i.kind === 'checkin' && i.pid === id); });
+  save();
+}
 
 
 /* people */
-function lastLog(p){ var best = null; (p.logs || []).forEach(function(l){ if(validISO(l.date) && (!best || l.date > best.date)) best = l; }); return best; }
-function nextDue(p){ var l = lastLog(p); return l ? addDays(l.date, +p.rhythm || 30) : today(); }
+function cmGroupNorm(g){ var v = String(g || '').trim().toLowerCase(); for(var i = 0; i < PGROUPS.length; i++) if(PGROUPS[i].toLowerCase() === v) return PGROUPS[i]; return v ? 'Other' : 'Friends'; }
+function cmRhythm(p){ var n = parseInt(p && p.rhythm, 10); return n >= 1 && n <= 999 ? n : 30; }
+function cmRhyStd(p){ return !p.rhyC && RHYTHM.some(function(x){ return +x[0] === cmRhythm(p); }); }
+function cmRhyLabel(p){ var n = cmRhythm(p); if(cmRhyStd(p)) return RHYTHM.filter(function(x){ return +x[0] === n; })[0][1]; return n === 1 ? 'Every day' : 'Every ' + n + ' days'; }
+function cmPerson(id){ var it = null; for(var i = 0; i < S.items.length; i++) if(S.items[i].id === id){ it = S.items[i]; break; } return it && it.kind === 'person' ? it : null; }
+function cmPeople(){ return S.items.filter(function(i){ return i.kind === 'person'; }); }
+function ciFor(pid){ return S.items.filter(function(i){ return i.kind === 'checkin' && i.pid === pid && validISO(i.date); }); }
+function ciDoneList(pid, upTo){ return ciFor(pid).filter(function(i){ return i.done && (!upTo || i.date <= upTo); }).sort(byDate); }
+function ciPending(pid){ return ciFor(pid).filter(function(i){ return !i.done; }).sort(byDate); }
+function lastLog(p){ var d = ciDoneList(p.id, today()); return d.length ? d[d.length - 1] : null; }
+function cmRhyDue(p){ var l = lastLog(p); return l ? addDays(l.date, cmRhythm(p)) : today(); }
+function nextDue(p){ var pe = ciPending(p.id); return pe.length ? pe[0].date : cmRhyDue(p); }
+function cmLastSeen(p){
+  var t = today(), best = validISO(p.lastSeen) && p.lastSeen <= t ? p.lastSeen : '';
+  ciDoneList(p.id, t).forEach(function(c){ if((c.types || []).some(function(x){ return x === 'In-Person' || x === 'Visit'; }) && c.date > best) best = c.date; });
+  return best;
+}
+function ciName(it){ var q = cmPerson(it.pid); return q ? (q.name || 'Someone') : 'Someone'; }
+function ciTitle(it, late){
+  var nm = ciName(it);
+  if(it.done) return 'Checked in: ' + nm + ((it.types || []).length ? ' · ' + it.types.join(', ') : '');
+  return (it.time ? fmtTime(it.time) + ' ' : '') + (late ? 'Overdue: check in with ' : 'Check in with ') + nm;
+}
+function ciMoodEm(list){ return (list || []).map(function(m){ var x = CI_MOODS.filter(function(q){ return q[0] === m; })[0]; return x ? x[1] : ''; }).join(''); }
+function cmItemStyle(it){ var q = it.kind === 'person' ? it : cmPerson(it.pid); return q && q.color ? {cls:' pc', style:dzPStyle(q)} : {cls:'', style:''}; }
+/* logging: a planned check-in is logged on its own date, never in the future */
+function ciLog(it){ ciMaterialize(it); it.done = true; if(it.date > today()) it.date = today(); it.updated = Date.now(); }
+function ciMaterialize(it){ if(D && D.draft && D.draft === it){ S.items.push(it); D.draft = null; } }
+function ciStartDue(pid, from){
+  var q = cmPerson(pid); if(!q) return;
+  var pe = ciPending(pid);
+  if(pe.length){ openItem(pe[0].id, from); return; }
+  var due = cmRhyDue(q), t = today();
+  var it = {id:uid(), kind:'checkin', name:'', date:due < t ? t : due, description:'', notes:'', reminder:'', reminderTime:'09:00', subtasks:[], pid:pid, types:[], moods:[], time:'', done:false, followId:'', fromId:'', created:Date.now()};
+  D = {mode:'item', id:it.id, from:from || null, draft:it}; drawItem(); showDrawer();
+}
+function cmLogNow(pid, fromCP){
+  var t = today(), pe = ciPending(pid).filter(function(c){ return c.date <= t; })[0], it;
+  if(pe){ it = pe; it.done = true; it.date = t; it.updated = Date.now(); }
+  else it = newItem('checkin', {pid:pid, date:t, done:true});
+  save(); render(); openItem(it.id, null); if(fromCP){ D.fromCP = fromCP; drawItem(); }
+}
+function ciFollowField(el, live){
+  var it = getItem(D.id), fi = it && it.followId && getItem(it.followId); if(!fi) return;
+  var ff = el.getAttribute('data-ff'), v = el.value;
+  if(ff === 'date'){ if(!validISO(v)) return; setField(fi, 'date', v); if(!fi.done){ fi.reminder = v; fi.remDismissed = ''; } }
+  if(ff === 'time'){ setField(fi, 'time', v); fi.reminderTime = v || '09:00'; }
+  save(); if(!live) renderSoon();
+}
+function ciFollowSet(it, on){
+  var f = it.followId && getItem(it.followId);
+  if(on){
+    if(f) return f;
+    ciMaterialize(it);
+    var fd = addDays(validISO(it.date) ? it.date : today(), 1); if(fd < today()) fd = addDays(today(), 1);
+    f = newItem('checkin', {pid:it.pid, date:fd, done:false, fromId:it.id, reminder:fd, reminderTime:'09:00'});
+    it.followId = f.id; it.updated = Date.now(); return f;
+  }
+  if(f && !f.done && !f.notes && !(f.moods || []).length && !(f.types || []).length) S.items = S.items.filter(function(i){ return i.id !== f.id; });
+  else if(f) f.fromId = '';
+  it.followId = ''; it.updated = Date.now(); return null;
+}
 function daysBetween(a, b){ return Math.round((toDate(b) - toDate(a)) / 864e5); }
 function nextBirthday(p){
   if(!validISO(p.birthday)) return null;
@@ -1513,9 +1636,10 @@ function personEntries(p, start, end, put){
     var b = parse(p.birthday), y0 = parse(start).y, y1 = parse(end).y;
     for(var y = y0; y <= y1; y++) put(iso(y, b.m, Math.min(b.d, dim(y, b.m))), p, {sub:'bday'});
   }
-  (p.logs || []).forEach(function(l){ put(l.date, p, {sub:'log', log:l}); });
-  var nd = nextDue(p), t = today();
-  put(nd < t ? t : nd, p, {sub:'due', late: nd < t});
+  /* planned check-ins show themselves; otherwise the rhythm shows when the next one is due */
+  if(ciPending(p.id).length) return;
+  var nd = cmRhyDue(p), t = today();
+  put(nd < t ? t : nd, Object.assign({}, p, {id:'due:' + p.id}), {sub:'due', late: nd < t});
 }
 
 /* day notes */
@@ -1732,7 +1856,7 @@ function applyDebtPayment(d, occ, on){
 function catIcon(c, sm){ return c === 'bills' ? '<span class="fin-ico fin-bill' + (sm ? ' sm' : '') + '" aria-hidden="true">' + (sm ? '$' : '$$') + '</span>' : '<span class="cat-ico ci-' + c + (sm ? ' sm' : '') + '" aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-' + c + '"/></svg></span>'; }
 function itemIcon(it, cls){ var ps = dzItemStyle(it); return isFin(it) ? '<span class="fin-ico fin-' + finCls(it) + (cls ? ' ' + cls : '') + '" aria-hidden="true">$$</span>' : '<span class="cat-ico ci-' + catOf(it) + ps.cls + (cls ? ' ' + cls : '') + '"' + ps.style + ' aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-' + catOf(it) + '"/></svg></span>'; }
 function withIcon(it, html){ return '<span class="dwrap">' + itemIcon(it) + html + '</span>'; }
-function markHTML(e){ return isFin(e.it) ? '<span class="fin-ico fin-' + finCls(e.it) + ' sm" aria-hidden="true">$</span>' : e.it.kind === 'dentry' ? itemIcon(e.it, 'sm') : catIcon(catOf(e.it), true); }
+function markHTML(e){ var k = e.it.kind; return isFin(e.it) ? '<span class="fin-ico fin-' + finCls(e.it) + ' sm" aria-hidden="true">$</span>' : k === 'dentry' || k === 'checkin' || k === 'person' ? itemIcon(e.it, 'sm') : catIcon(catOf(e.it), true); }
 
 /* bills (legacy) */
 function billDueIn(b, y, m){
@@ -1758,6 +1882,7 @@ function collect(start, end, useFilter, noDating){
   S.items.forEach(function(it){
     if(it.kind === 'dentry' && noDating) return;
     if(it.kind === 'person'){ personEntries(it, start, end, put); return; }
+    if(it.kind === 'checkin' && !cmPerson(it.pid)) return;
     if(it.kind === 'trip' || it.kind === 'event'){
       if(!validISO(it.date)) return;
       var last = validISO(it.end) && it.end > it.date ? it.end : it.date;
@@ -1784,11 +1909,12 @@ function collect(start, end, useFilter, noDating){
   });
   return map;
 }
-function entryDone(e){ var k = e.it.kind; return k === 'bill' || k === 'debt' ? !!e.paid : k === 'income' || k === 'expense' ? false : k === 'person' ? e.sub === 'log' : isDone(e.it); }
+function entryDone(e){ var k = e.it.kind; return k === 'bill' || k === 'debt' ? !!e.paid : k === 'income' || k === 'expense' ? false : k === 'person' ? false : isDone(e.it); }
 function entryCode(e){
   var it = e.it;
   if(it.kind === 'cpost') return it.platform || 'POST';
-  if(it.kind === 'person') return e.sub === 'bday' ? 'BDAY' : e.sub === 'log' ? 'DONE' : 'CHECK-IN';
+  if(it.kind === 'person') return e.sub === 'bday' ? 'BDAY' : 'CHECK-IN';
+  if(it.kind === 'checkin') return it.done ? 'DONE' : 'CHECK-IN';
   return KINDS[it.kind].code;
 }
 function entryTitle(e){
@@ -1801,6 +1927,7 @@ function entryTitle(e){
   if(it.kind === 'expense') return (it.name || 'Expense') + (it.amount ? ' · ' + money(num(it.amount)) : '');
   if(it.kind === 'debt') return (it.name || 'Debt') + ' payment' + (it.minPay ? ' · ' + money(num(it.minPay)) : '');
   if(it.kind === 'dentry') return dzTitle(it);
+  if(it.kind === 'checkin') return ciTitle(it, !it.done && it.date < today());
   var t = it.name || '(untitled)';
   if((it.kind === 'event' || it.kind === 'task' || it.kind === 'project') && it.time) t = fmtTime(it.time) + ' ' + t;
   return t;
@@ -1823,6 +1950,7 @@ function agItem(e){
   if(it.kind === 'person') k = e.sub === 'bday' ? 'Birthday' : e.sub === 'log' ? 'Check-in' + (e.log && e.log.note ? ' · ' + e.log.note : '') : 'Check-in due' + (e.late ? ' · overdue' : '');
   if(it.kind === 'cpost') k = 'Content Calendar · ' + [it.platformName || it.platform, it.status].filter(Boolean).join(' · ');
   if(it.kind === 'dentry') k = 'Dating' + (it.likeness ? ' · Likeness ' + it.likeness + '/10' : '') + (it.overall ? ' · Overall ' + it.overall + '/10' : '');
+  if(it.kind === 'checkin') k = it.done ? 'Check-in' + (ciMoodEm(it.moods) ? ' · ' + ciMoodEm(it.moods) : '') + (it.notes ? ' · ' + it.notes.slice(0, 60) : '') : 'Check-in planned' + (it.date < today() ? ' · overdue' : '');
   return '<button type="button" class="ag-item" data-act="open" data-id="' + it.id + '">' + markHTML(e) +
     '<span class="ag-t' + (entryDone(e) ? ' done' : '') + '">' + esc(entryTitle(e)) + '</span><span class="ag-k">' + esc(k) + '</span></button>';
 }
@@ -2157,8 +2285,8 @@ function summaryHTML(pg){
       return card('work', 'Work', wt.done, 'to-dos done', stats);
     },
     community: function(){
-      var ppl = S.items.filter(function(i){ return i.kind === 'person'; }), logs = 0, who = {}, last = null;
-      ppl.forEach(function(p){ (p.logs || []).forEach(function(l){ if(inR(l.date)){ logs++; who[p.id] = 1; if(!last || l.date > last.d) last = {d:l.date, n:p.name || 'Someone', m:l.method}; } }); });
+      var ppl = cmPeople(), logs = 0, who = {}, last = null;
+      S.items.forEach(function(c){ if(c.kind !== 'checkin' || !c.done || !validISO(c.date) || !inR(c.date) || !cmPerson(c.pid)) return; logs++; who[c.pid] = 1; if(!last || c.date > last.d) last = {d:c.date, n:ciName(c)}; });
       var bd = ppl.filter(function(p){ if(!validISO(p.birthday)) return false; var b = parse(p.birthday), dd = iso(P.y, b.m, Math.min(b.d, dim(P.y, b.m))); return inR(dd); })
         .sort(function(a, b){ return parse(a.birthday).m - parse(b.birthday).m || parse(a.birthday).d - parse(b.birthday).d; });
       var stats = [['People reached', Object.keys(who).length + ' of ' + ppl.length], ['Overdue now', isNow ? ppl.filter(function(p){ return nextDue(p) < t; }).length : '—'], ['Birthdays', bd.length]];
@@ -2207,34 +2335,61 @@ function monthTodo(){
   return h + '</aside>';
 }
 function peopleSection(){
-  var t = today(), ppl = S.items.filter(function(i){ return i.kind === 'person'; });
-  var data = ppl.map(function(p){ return {p:p, next:nextDue(p), last:lastLog(p)}; })
-    .sort(function(a,b){ return a.next.localeCompare(b.next) || (a.p.name || '').localeCompare(b.p.name || ''); });
-  var late = data.filter(function(x){ return x.next < t; }).length;
-  var soon = data.filter(function(x){ return x.next >= t && x.next <= addDays(t, 7); }).length;
-  var ym = t.slice(0, 7), monthCount = ppl.filter(function(p){ return (p.logs || []).some(function(l){ return l.date.slice(0, 7) === ym; }); }).length;
+  var t = today(), ppl = cmPeople();
+  var late = ppl.filter(function(p){ return nextDue(p) < t; }).length;
+  var soon = ppl.filter(function(p){ var n = nextDue(p); return n >= t && n <= addDays(t, 7); }).length;
+  var ym = t.slice(0, 7), monthCount = ppl.filter(function(p){ return ciDoneList(p.id, t).some(function(c){ return c.date.slice(0, 7) === ym; }); }).length;
   var bdays = ppl.map(function(p){ return {p:p, d:nextBirthday(p)}; }).filter(function(x){ return x.d && x.d <= addDays(t, 30); }).sort(function(a,b){ return a.d.localeCompare(b.d); });
   var tiles = '<div class="tiles">' +
     '<div class="tile ' + (late ? 't-warn' : 't-plain') + '"><span class="k">Overdue</span><span class="v">' + late + '</span><span class="d">' + (late ? 'reach out soon' : 'nobody overdue') + '</span></div>' +
     '<div class="tile t-community"><span class="k">Due this week</span><span class="v">' + soon + '</span><span class="d">next 7 days</span></div>' +
     '<div class="tile t-ok"><span class="k">Checked in · ' + MON[parse(t).m-1] + '</span><span class="v">' + monthCount + '</span><span class="d">of ' + plural(ppl.length, 'person').replace('persons','people') + '</span></div>' +
     '<div class="tile t-plain"><span class="k">Birthdays · next 30 days</span>' + (bdays.length ? '<span class="bd">' + bdays.slice(0,4).map(function(x){ return '<b>' + esc(x.p.name || 'Someone') + '</b> ' + fmtShort(x.d); }).join('<br>') + (bdays.length > 4 ? '<br>+' + (bdays.length - 4) + ' more' : '') + '</span>' : '<span class="v">0</span>') + '</div></div>';
-  var tmpl = 'minmax(0,1fr) 128px 140px 132px 176px 150px 96px';
-  var rows = data.map(function(x){
-    var p = x.p, dl = dueLabel(x.next), l = x.last;
-    return '<li class="row wide" data-id="' + p.id + '" style="--cols:' + tmpl + '">' +
-      '<div class="fld f-main">' + control(p, {f:'name', label:'Name', type:'text'}) + '<span class="meta">' + metaHTML(p) + '</span></div>' +
-      '<div class="fld"><span class="fl">Group</span><select class="pick neutral" data-f="group" data-id="' + p.id + '" aria-label="Group">' + opts(PGROUPS, p.group) + '</select></div>' +
-      '<div class="fld"><span class="fl">Check in</span><select class="pick neutral" data-f="rhythm" data-id="' + p.id + '" aria-label="How often">' + opts(RHYTHM, p.rhythm) + '</select></div>' +
-      '<div class="fld"><span class="fl">Last check-in</span><span class="ppl-last' + (l ? '' : ' none') + '">' + (l ? esc(fmtLogDate(l.date) + (l.method ? ' · ' + l.method : '')) : 'Not yet') + '</span></div>' +
-      '<div class="fld"><span class="fl">Next</span>' + withIcon(p, '<span class="ppl-status ' + dl[0] + '">' + esc(dl[1]) + '</span>') + '</div>' +
-      '<div class="fld"><span class="fl">Log today</span><select class="pick st-sched" data-act="quick-log" data-id="' + p.id + '" aria-label="Log a check-in today with ' + esc(p.name) + '"><option value="">Log check-in…</option>' + METHODS.map(function(mm){ return '<option>' + mm + '</option>'; }).join('') + '</select></div>' +
-      '<div class="acts"><button type="button" class="open-btn" data-act="open" data-id="' + p.id + '">Open</button>' + delBtn(p.id) + '</div></li>';
-  }).join('');
-  var head = '<div class="rhead wide" style="--cols:' + tmpl + '" aria-hidden="true"><span class="c0">Name</span><span>Group</span><span>Check in</span><span>Last check-in</span><span>Next</span><span>Log today</span><span></span></div>';
-  return '<section class="card sec"><div class="sec-head">' + secTitle(catIcon('community'), 'Community', 'Friends &amp; Family Check-ins') + '<div class="sec-meta"><span><b>' + ppl.length + '</b> ' + (ppl.length === 1 ? 'person' : 'people') + '</span></div></div>' +
-    (ppl.length ? tiles : '') + addForm('person') +
-    (rows ? head + '<ul class="rows">' + rows + '</ul>' : '<p class="empty">Add the people you want to stay close to and how often you want to check in. Each one shows when you are due, and you can log calls, texts and visits.</p>') + '</section>';
+  var form = '<form class="add-row cm-add" data-form="cm-add">' +
+    '<label class="af af-name"><span class="vh">Add a friend or family member</span><input name="name" data-k="add:cm" placeholder="Add a friend or family member…" autocomplete="off" enterkeyhint="done"></label>' +
+    '<label class="af"><span>Category</span><select class="ctl" name="group">' + opts(PGROUPS, 'Friends') + '</select></label>' +
+    '<label class="af"><span>Check-in frequency</span><select class="ctl" name="rhythm">' + opts(RHYTHM_C, '30') + '</select></label>' +
+    '<label class="af cm-rhyn" hidden><span>Every … days</span><select class="ctl" name="rhyN">' + opts(RHY_NUMS, '10') + '</select></label>' +
+    '<label class="af"><span>Last check-in</span><input class="ctl" type="date" name="last"></label>' +
+    '<button class="btn primary" type="submit">Add person</button></form>';
+  return '<section class="card sec cm-sec"><div class="sec-head">' + secTitle(catIcon('community'), 'Community', 'Friends &amp; Family Check-ins') + '<div class="sec-meta"><span><b>' + ppl.length + '</b> ' + (ppl.length === 1 ? 'person' : 'people') + '</span></div></div>' +
+    (ppl.length ? tiles : '') + form +
+    '<p class="hint cm-hint">Each person gets a card in their category below. Pick a Last check-in date if you already talked recently. Tap <b>Log check-in</b> on a card whenever you reach out.</p></section>';
+}
+function cmSorted(g){ return cmPeople().filter(function(p){ return p.group === g; }).sort(function(a, b){ return (+a.ord || 0) - (+b.ord || 0) || (a.created || 0) - (b.created || 0); }); }
+function cmGroupsHTML(){
+  var t = today();
+  return '<div class="cm-groups" id="cm-groups">' + PGROUPS.map(function(g){
+    var list = cmSorted(g), key = 'cm:' + g, late = list.filter(function(p){ return nextDue(p) < t; }).length;
+    var head = '<div class="dz-grid-head cm-ghead"><p class="eyebrow">' + esc(g) + '</p><span>' + (list.length ? plural(list.length, 'person').replace('persons', 'people') + (late ? ' · ' + late + ' overdue' : '') : 'No one yet') + '</span>' + pvBtn(key, g) + '</div>';
+    if(isClosed(key)) return head;
+    return head + '<div class="sm-grid dz-grid cm-grid" data-grp="' + esc(g) + '">' +
+      (list.length ? list.map(cmCard).join('') : '<p class="cm-empty">Add someone above and choose <b>' + esc(g) + '</b> to see their card here.</p>') + '</div>';
+  }).join('') + '</div>';
+}
+function cmCard(p){
+  var t = today(), done = ciDoneList(p.id, t), last = done[done.length - 1], pe = ciPending(p.id), nd = nextDue(p), dl = dueLabel(nd);
+  if(pe.length && pe[0].time) dl = [dl[0], dl[1] + ' · ' + fmtTime(pe[0].time)];
+  var seen = cmLastSeen(p), nb = nextBirthday(p), nbn = nb ? daysBetween(t, nb) : 0;
+  var stats = [
+    ['Last check-in', last ? fmtLogDate(last.date) + '<small>' + dzAgo(last.date, t) + '</small>' : '—'],
+    ['Check-in frequency', esc(cmRhyLabel(p))],
+    ['Check-ins', done.length + '<small>all time</small>'],
+    ['Last seen in person', seen ? fmtLogDate(seen) + '<small>' + dzAgo(seen, t) + '</small>' : '—'],
+    ['Birthday', nb ? fmtShort(nb) + '<small>' + (nbn === 0 ? 'today 🎂' : 'in ' + plural(nbn, 'day')) + '</small>' : '—'],
+    ['Favorite color', p.favColor ? esc(p.favColor) : '—'],
+    ['Favorite food', p.favFood ? esc(p.favFood) : '—']
+  ];
+  var note = [], lm = done.filter(function(c){ return (c.moods || []).length; }).pop();
+  if(lm) note.push('Feeling ' + ciMoodEm(lm.moods) + ' on ' + fmtShort(lm.date));
+  if(p.notes) note.push(esc(p.notes.length > 90 ? p.notes.slice(0, 88).replace(/\s+\S*$/, '') + '…' : p.notes));
+  return '<article class="card sm-card dz-card cm-card" data-pid="' + esc(p.id) + '" style="border-top-color:' + (p.color || 'var(--community-mid)') + '"><div class="sm-head">' +
+    '<button type="button" class="dz-grip" data-pid="' + esc(p.id) + '" aria-label="Move ' + esc(p.name || 'person') + '. Drag, or use the arrow keys." title="Drag to move"><svg viewBox="0 0 10 16" aria-hidden="true"><g fill="currentColor"><circle cx="2.5" cy="2.5" r="1.5"/><circle cx="7.5" cy="2.5" r="1.5"/><circle cx="2.5" cy="8" r="1.5"/><circle cx="7.5" cy="8" r="1.5"/><circle cx="2.5" cy="13.5" r="1.5"/><circle cx="7.5" cy="13.5" r="1.5"/></g></svg></button>' +
+    itemIcon(p) + '<h3>' + esc(p.name || 'Someone') + '</h3>' +
+    '<button type="button" class="btn sm dz-edit" data-act="open" data-id="' + esc(p.id) + '" aria-label="Open ' + esc(p.name || 'their') + ' profile">Profile</button></div>' +
+    '<div class="cm-next"><span class="ppl-status ' + dl[0] + '">' + esc(dl[1]) + '</span><button type="button" class="btn sm primary cm-log" data-act="cm-log" data-pid="' + esc(p.id) + '">Log check-in</button></div>' +
+    '<ul class="sm-stats">' + stats.map(function(x){ return '<li><span>' + x[0] + '</span><b>' + x[1] + '</b></li>'; }).join('') + '</ul>' +
+    (note.length ? '<p class="sm-note">' + note.join(' · ') + '</p>' : '') + '</article>';
 }
 function fmtSynced(s){ var d = new Date(s); return isNaN(d) ? 'earlier' : d.toLocaleString('en-US', {month:'short', day:'numeric', hour:'numeric', minute:'2-digit'}); }
 function contentSyncSection(){
@@ -2292,12 +2447,13 @@ function tbShift(pg, dir){
 }
 function tbTaskPage(pg){ return pg === 'expenses' ? 'bills' : pg; }
 function priIcon(pr){ return pr === 'High' ? '<span class="pri-ico h" aria-hidden="true">!!!</span>' : pr === 'Medium' ? '<span class="pri-ico m" aria-hidden="true">!!</span>' : '<span class="pri-ico l" aria-hidden="true">!</span>'; }
-function eLate(e){ var k = e.it.kind; return !entryDone(e) && e.d < today() && (k === 'task' || k === 'bill' || k === 'debt' || k === 'project' || (k === 'person' && e.sub === 'due')); }
-function itTime(it){ return (it.kind === 'event' || it.kind === 'task' || it.kind === 'project') && /^\d{2}:\d{2}/.test(it.time || '') ? it.time : ''; }
+function eLate(e){ var k = e.it.kind; return !entryDone(e) && e.d < today() && (k === 'task' || k === 'bill' || k === 'debt' || k === 'project' || k === 'checkin' || (k === 'person' && e.sub === 'due')); }
+function itTime(it){ return (it.kind === 'event' || it.kind === 'task' || it.kind === 'project' || it.kind === 'checkin') && /^\d{2}:\d{2}/.test(it.time || '') ? it.time : ''; }
 function eSort(a, b){ return (entryDone(a) ? 1 : 0) - (entryDone(b) ? 1 : 0) || (a.d || '9999').localeCompare(b.d || '9999') || itTime(a.it).localeCompare(itTime(b.it)) || (PRI_RANK[a.it.priority || ''] - PRI_RANK[b.it.priority || '']); }
 function eCheck(e){
   var it = e.it, k = it.kind, done = entryDone(e);
   if(k === 'task') return '<input type="checkbox" class="chk" data-act="check" data-id="' + it.id + '"' + (done ? ' checked' : '') + ' aria-label="Done: ' + esc(it.name) + '">';
+  if(k === 'checkin') return '<input type="checkbox" class="chk" data-act="ci-check" data-id="' + it.id + '"' + (done ? ' checked' : '') + ' aria-label="Checked in with ' + esc(ciName(it)) + '">';
   if(k === 'bill') return '<input type="checkbox" class="chk" data-act="occ-paid" data-id="' + it.id + '" data-occ="' + e.d + '"' + (e.paid ? ' checked' : '') + ' aria-label="Paid: ' + esc(it.name) + '">';
   if(k === 'debt') return '<input type="checkbox" class="chk" data-act="debt-paid" data-id="' + it.id + '" data-occ="' + e.d + '"' + (e.paid ? ' checked' : '') + ' aria-label="Payment made: ' + esc(it.name) + '">';
   if(k === 'income') return '<input type="checkbox" class="chk" data-act="occ-recv" data-id="' + it.id + '" data-occ="' + e.d + '"' + (e.recv ? ' checked' : '') + ' aria-label="Received">';
@@ -2309,7 +2465,8 @@ function eTag(e){
   if(k === 'trip' || k === 'project') return it.status ? '<span class="pill ' + (STATUS_CLS[it.status] || 'st-idea') + '">' + esc(it.status) + '</span>' : '<span></span>';
   if(k === 'cpost') return it.status ? '<span class="pill ' + (CP_STATUS_CLS[it.status] || 'st-idea') + '">' + esc(it.status) + '</span>' : '<span></span>';
   if(k === 'dentry') return it.likeness ? '<span class="pill c-dating" title="Scale of likeness">♥ ' + esc(it.likeness) + '/10</span>' : '<span></span>';
-  if(k === 'person') return '<span class="pill c-community">' + (e.sub === 'bday' ? 'Birthday' : e.sub === 'log' ? 'Checked in' : 'Check-in') + '</span>';
+  if(k === 'person') return '<span class="pill c-community">' + (e.sub === 'bday' ? 'Birthday' : 'Check-in due') + '</span>';
+  if(k === 'checkin') return '<span class="pill c-community">' + (it.done ? (ciMoodEm(it.moods).slice(0, 4) || '✓') + ' Checked in' : 'Planned') + '</span>';
   if(k === 'income') return '<span class="pill t-inc">' + (e.recv ? 'Received' : 'Expected') + '</span>';
   if(k === 'expense') return '<span class="pill t-exp">' + esc(it.ecat || 'Expense') + '</span>';
   if(k === 'event') return '<span class="pill neutral">Event</span>';
@@ -2877,7 +3034,7 @@ function dzGlyph(hex){ return dzLum(hex) < .3 ? '#E8B886' : '#4A2E17'; }
 function dzPStyle(p){ return p && p.color ? ' style="--pc:' + p.color + ';--pg:' + dzGlyph(p.color) + '"' : ''; }
 function dzItemPerson(it){ var ids = it.who || []; for(var i = 0; i < S.dating.people.length; i++){ var q = S.dating.people[i]; if(ids.indexOf(q.id) >= 0) return q; } return null; }
 function dzPIcon(p, cls){ return '<span class="cat-ico ci-dating' + (p && p.color ? ' pc' : '') + (cls ? ' ' + cls : '') + '"' + dzPStyle(p) + ' aria-hidden="true"><svg viewBox="0 0 24 24"><use href="#i-dating"/></svg></span>'; }
-function dzItemStyle(it){ if(!it || it.kind !== 'dentry') return {cls:'', style:''}; var q = dzItemPerson(it); return q && q.color ? {cls:' pc', style:dzPStyle(q)} : {cls:'', style:''}; }
+function dzItemStyle(it){ if(it && (it.kind === 'person' || it.kind === 'checkin')) return cmItemStyle(it); if(!it || it.kind !== 'dentry') return {cls:'', style:''}; var q = dzItemPerson(it); return q && q.color ? {cls:' pc', style:dzPStyle(q)} : {cls:'', style:''}; }
 
 /* ---------- dating: summary of an person's detailed descriptions ---------- */
 var DZ_STOP_X = ('went said told felt feel feeling feels like just really also then very much even still some more what when into because since after before again back later today tonight night time first last didnt dont doesnt wasnt werent isnt arent cant couldnt wouldnt shouldnt ive youre hes shes theyre were been being have having does doing will would could should might must about there here they them their which while with without your yours ours mine him his her hers its our out over under well good great okay pretty kind sort thing things stuff made make makes making get gets got getting goes going come came coming know knew think thought want wanted need needed say says tell tells asked ask and the for that this from was are but not all any can had has how who why way yes yet one two').split(' ');
@@ -3125,8 +3282,8 @@ function renderNotices(){
   if(due.length){
     h += '<div class="notice rem-notice"><span class="n-h">' + BELL + '<b>' + plural(due.length, 'reminder') + ' due</b></span><div class="n-list">' +
       due.slice(0, 8).map(function(it){
-        return '<span class="n-item"><button type="button" class="linkish" data-act="open" data-id="' + it.id + '"><span class="dot d-' + catOf(it) + '"></span><span class="nm">' + esc(it.name || '(untitled)') + '</span><span class="muted">' + fmtShort(it.reminder) + '</span></button>' +
-          '<button type="button" class="del" data-act="dismiss-rem" data-id="' + it.id + '" aria-label="Dismiss reminder for ' + esc(it.name) + '" title="Dismiss">×</button></span>';
+        return '<span class="n-item"><button type="button" class="linkish" data-act="open" data-id="' + it.id + '"><span class="dot d-' + catOf(it) + '"></span><span class="nm">' + esc(it.kind === 'checkin' ? ciTitle(it) : it.name || '(untitled)') + '</span><span class="muted">' + fmtShort(it.reminder) + '</span></button>' +
+          '<button type="button" class="del" data-act="dismiss-rem" data-id="' + it.id + '" aria-label="Dismiss reminder for ' + esc(it.kind === 'checkin' ? ciTitle(it) : it.name) + '" title="Dismiss">×</button></span>';
       }).join('') + (due.length > 8 ? '<span class="muted">+' + (due.length - 8) + ' more</span>' : '') + '</div></div>';
   }
   if(!storageOK){
@@ -3153,7 +3310,7 @@ function pageHTML(id){
     case 'work': return head + summaryHTML('work') + todoSection('work') + trackerSection('project') + taskBoard('work');
     case 'expenses': return head + finBar() + summaryHTML('expenses') + billsSection() + incomeSection() + expenseSection() + debtSection() +
       (S.items.some(function(i){ return i.kind === 'task' && i.page === 'bills'; }) ? todoSection('bills') : '') + taskBoard('expenses');
-    case 'community': return head + summaryHTML('community') + todoSection('community') + peopleSection() + taskBoard('community');
+    case 'community': return head + summaryHTML('community') + todoSection('community') + peopleSection() + cmGroupsHTML() + taskBoard('community');
     case 'dating':
       var dzHidden = isClosed('dating');
       var dzHead = '<header class="page-head dz-head"><div class="dz-headrow"><div><p class="eyebrow">' + pad(idx) + ' · ' + esc(p.label) + '</p><h1>' + p.h1 + '</h1></div>' + pvBtn('dating', 'everything on the Dating page') + '</div>' +
@@ -3194,6 +3351,7 @@ function renderNav(){
   }
 }
 var SKIP_FORM = null;
+function cmSyncAdd(){ var f = main.querySelector('form[data-form="cm-add"]'); if(!f) return; var r = f.querySelector('.cm-rhyn'); if(r) r.hidden = f.elements.rhythm.value !== 'c'; }
 function formKey(f){ return [f.getAttribute('data-form'), f.getAttribute('data-kind') || '', f.getAttribute('data-page') || ''].join('|'); }
 function render(){
   var ae = document.activeElement, k = ae && main.contains(ae) && ae.getAttribute('data-k'), sel = null;
@@ -3214,6 +3372,7 @@ function render(){
     var f = Array.prototype.filter.call(main.querySelectorAll('form[data-form]'), function(x){ return formKey(x) === kv[0]; })[0], el = f && f.elements[kv[1]];
     if(el && el.tagName) el.value = kv[2];
   });
+  cmSyncAdd();
   if(k){
     var el = main.querySelector('[data-k="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]');
     if(el){ try { el.focus({preventScroll:true}); if(sel && el.setSelectionRange) el.setSelectionRange(sel[0], sel[1]); } catch(e){} }
@@ -3423,6 +3582,8 @@ function drawItem(){
   var prevSc = dr.querySelector('.d-scroll'), prevTop = prevSc && dr.getAttribute('data-drawn') === D.id ? prevSc.scrollTop : 0;
   if(it.kind === 'cpost'){ drawContentPost(it); return; }
   if(it.kind === 'dentry'){ drawDating(it, prevTop); return; }
+  if(it.kind === 'person'){ drawCommPerson(it, prevTop); return; }
+  if(it.kind === 'checkin'){ drawCheckin(it, prevTop); return; }
   var c = catOf(it);
   var crumb = (D.from ? '<button type="button" class="btn sm" data-act="d-back">‹ ' + fmtShort(D.from) + '</button>' : '') +
     '<span class="pill c-' + c + '">' + esc(it.kind === 'goal' ? 'Yearly Goals · ' + goalYear(it) : CATS[c]) + '</span><span>' + esc(KINDS[it.kind].label) + '</span>';
@@ -3477,6 +3638,85 @@ function drawDating(it, prevTop){
     '<section class="d-sec"><h3>Detailed Description</h3><textarea class="d-desc" data-df="description" placeholder="What happened, what was said, how it felt…" aria-label="Detailed description">' + esc(it.description) + '</textarea></section>' +
     sec('Scale of Likeness', scale('likeness', 'Not feeling it', 'Really into them'), 'How you feel about them right now') +
     '<div class="d-foot"><button type="button" class="btn danger" data-act="d-del">Delete</button><button type="button" class="btn primary" data-act="close">Done</button></div>' +
+  '</div>';
+  dr.setAttribute('data-drawn', D.id);
+  var sc = dr.querySelector('.d-scroll'); if(sc && prevTop) sc.scrollTop = prevTop;
+}
+function cmSwatches(p){
+  return '<div class="dz-swatches" role="group" aria-label="Icon color">' + DZ_COLORS.map(function(c){ return '<button type="button" class="dz-sw" data-act="cm-color" data-v="' + c[0] + '" aria-pressed="' + ((p.color || '') === c[0]) + '"><span class="sw" style="background:' + (c[0] || 'var(--community-mid)') + '"></span>' + c[1] + '</button>'; }).join('') +
+    '<label class="dz-sw custom' + (p.color && !DZ_COLORS.some(function(c){ return c[0] === p.color; }) ? ' on' : '') + '"><input type="color" data-df="color" value="' + (p.color || '#D2646C') + '" aria-label="Pick any color"><span>Custom</span></label></div>';
+}
+function cmCiRow(c, t){
+  var meta = [];
+  if(c.time) meta.push(fmtTime(c.time));
+  if(ciMoodEm(c.moods)) meta.push(ciMoodEm(c.moods));
+  if(c.notes) meta.push(esc(c.notes.length > 70 ? c.notes.slice(0, 68).replace(/\s+\S*$/, '') + '…' : c.notes));
+  if(!c.done) meta.unshift(c.date < t ? '<span class="dz-warn">Overdue</span>' : 'Planned');
+  if(c.fromId) meta.push('Follow-up');
+  return '<li><button type="button" class="dz-erow" data-act="open" data-id="' + esc(c.id) + '">' + itemIcon(c, 'sm') +
+    '<span class="dz-eb"><span class="dz-et">' + esc((c.types || []).length ? c.types.join(', ') : c.done ? 'Check-in' : 'Check-in planned') + '</span>' + (meta.length ? '<span class="dz-em">' + meta.join(' · ') + '</span>' : '') + '</span>' +
+    '<span class="dz-ed">' + DOW[dowOf(c.date)].slice(0, 3) + ', ' + fmtLogDate(c.date) + '</span></button></li>';
+}
+function cmCiListHTML(p){
+  var t = today(), pend = ciPending(p.id), done = ciDoneList(p.id).reverse();
+  if(!pend.length && !done.length) return '<p class="muted dz-sum-empty">No check-ins yet. Tap Log check-in after you reach out.</p>';
+  return (pend.length ? '<p class="dz-eyear">Coming up</p><ul class="dz-elist">' + pend.map(function(c){ return cmCiRow(c, t); }).join('') + '</ul>' : '') +
+    (done.length ? '<p class="dz-eyear">Logged</p><ul class="dz-elist">' + done.map(function(c){ return cmCiRow(c, t); }).join('') + '</ul>' : '');
+}
+function drawCommPerson(p, prevTop){
+  var t = today(), dl = dueLabel(nextDue(p)), last = lastLog(p), custom = !cmRhyStd(p), nb = nextBirthday(p), seen = cmLastSeen(p), n = ciFor(p.id).length;
+  function row(l, h){ return '<div><dt>' + l + '</dt><dd>' + h + '</dd></div>'; }
+  var bdNote = nb ? (daysBetween(t, nb) === 0 ? 'Birthday today 🎂' : 'Next birthday ' + fmtShort(nb) + ' · in ' + plural(daysBetween(t, nb), 'day')) : '';
+  dr.innerHTML = topBar('<span class="pill c-community">Community</span><span>Person</span>') + '<div class="d-scroll">' +
+    '<div class="d-titlerow">' + itemIcon(p, 'big') + '<textarea class="d-title" data-df="name" rows="1" placeholder="Name" aria-label="Name">' + esc(p.name) + '</textarea></div>' +
+    '<div class="cm-dnext"><span class="ppl-status ' + dl[0] + '">' + esc(dl[1]) + '</span><button type="button" class="btn primary" data-act="cm-log" data-pid="' + esc(p.id) + '">Log check-in</button></div>' +
+    '<dl class="d-fields">' +
+      row('Category', dsel('group', PGROUPS, p.group)) +
+      row('Icon color', cmSwatches(p)) +
+      row('Check-in frequency', '<select class="ctl" data-df="rhythm">' + opts(RHYTHM_C, custom ? 'c' : String(cmRhythm(p))) + '</select>') +
+      (custom ? row('Every', '<span class="cm-every"><select class="ctl" data-df="rhyN" aria-label="Number of days">' + opts(RHY_NUMS, String(cmRhythm(p))) + '</select> days</span>') : '') +
+      row('Last check-in', last ? '<span>' + fmtLogDate(last.date) + ' <small class="muted">' + dzAgo(last.date, t) + '</small></span>' : '<span class="muted">Not yet</span>') +
+      row('Birthday', ddate('birthday', p.birthday) + (bdNote ? '<small class="muted cm-sub">' + bdNote + '</small>' : '')) +
+      row('Favorite color', dtext('favColor', p.favColor, 'e.g. Sage green')) +
+      row('Favorite food', dtext('favFood', p.favFood, 'e.g. Tacos, sushi')) +
+      row('Last seen in person', ddate('lastSeen', p.lastSeen) + (seen && seen !== p.lastSeen ? '<small class="muted cm-sub">From check-ins: ' + fmtLogDate(seen) + '</small>' : '')) +
+      row('How to reach', dtext('contact', p.contact, 'Phone, email, handle…')) +
+    '</dl>' +
+    '<p class="hint">Check-ins marked In-Person or Visit update Last seen in person on their own.</p>' +
+    '<section class="d-sec"><h3>What’s Going On</h3><textarea class="d-desc" data-df="description" placeholder="What is going on in their life right now?" aria-label="What is going on">' + esc(p.description) + '</textarea></section>' +
+    '<section class="d-sec"><h3>Notes</h3><textarea class="d-desc notes" data-df="notes" placeholder="Gift ideas, kids’ names, things to remember…" aria-label="Notes">' + esc(p.notes) + '</textarea></section>' +
+    '<section class="d-sec dz-entsec cm-cisec"><h3>Check-ins <span>' + n + '</span></h3>' + cmCiListHTML(p) + '</section>' +
+    '<div class="d-foot"><button type="button" class="btn danger" data-act="d-del" data-arm="Tap again · deletes their check-ins too">Delete</button><button type="button" class="btn primary" data-act="close">Done</button></div>' +
+  '</div>';
+  grow(dr.querySelector('.d-title'));
+  dr.setAttribute('data-drawn', D.id);
+  var sc = dr.querySelector('.d-scroll'); if(sc && prevTop) sc.scrollTop = prevTop;
+}
+function drawCheckin(it, prevTop){
+  var q = cmPerson(it.pid), t = today(), nm = q ? (q.name || 'Someone') : 'Someone', late = !it.done && it.date < t, draft = D.draft === it;
+  var f = it.followId && getItem(it.followId), src = it.fromId && getItem(it.fromId), bp = D.fromCP && cmPerson(D.fromCP);
+  var crumb = (bp ? '<button type="button" class="btn sm" data-act="d-backcp">‹ ' + esc(bp.name || 'Back') + '</button>' : D.from ? '<button type="button" class="btn sm" data-act="d-back">‹ ' + fmtShort(D.from) + '</button>' : '') + '<span class="pill c-community">Community</span><span>Check-in</span>';
+  function sec(h, body, hint){ return '<section class="d-sec dz-sec"><h3>' + h + (hint ? ' <span>' + hint + '</span>' : '') + '</h3>' + body + '</section>'; }
+  function chips(fld, list){
+    var cur = it[fld] || [];
+    return '<div class="dz-chips cm-chips" role="group" aria-label="' + esc(fld) + '">' + list.map(function(o){
+      return '<button type="button" class="dz-chip" data-act="dz-tog" data-f="' + fld + '" data-v="' + esc(o[0]) + '" aria-pressed="' + (cur.indexOf(o[0]) >= 0) + '">' + (o[2] ? '<span class="em" aria-hidden="true">' + o[2] + '</span>' : '') + esc(o[1]) + '</button>'; }).join('') + '</div>';
+  }
+  var when = fmtLong(it.date) + (it.time ? ' · ' + fmtTime(it.time) : '');
+  var status = it.done ? '<div class="ci-status ok"><span><b>✓ Checked in</b> ' + when + '</span><button type="button" class="btn sm" data-act="ci-undo">Not done yet</button></div>'
+    : '<div class="ci-status' + (late ? ' late' : '') + '"><span><b>' + (late ? 'Overdue' : it.date === t ? 'Due today' : 'Planned') + '</b> ' + when + '</span><button type="button" class="btn primary" data-act="ci-log">Log check-in</button></div>';
+  dr.innerHTML = topBar(crumb) + '<div class="d-scroll">' +
+    '<div class="d-titlerow">' + itemIcon(it, 'big') + '<h2 class="dz-title">Check-in with ' + (q ? '<button type="button" class="dz-link cm-plink" data-act="open" data-id="' + esc(q.id) + '">' + esc(nm) + '</button>' : esc(nm)) + '</h2></div>' +
+    status +
+    (src ? '<p class="hint ci-from">Follow-up from your <button type="button" class="dz-link" data-act="open" data-id="' + esc(src.id) + '">' + fmtShort(src.date) + ' check-in</button>.</p>' : '') +
+    sec('Log Check-in', '<dl class="d-fields"><div><dt>Date</dt><dd>' + ddate('date', it.date) + '</dd></div><div><dt>Time</dt><dd>' + dtime('time', it.time) + '</dd></div></dl>', it.done ? 'Change the date if it happened another day' : 'When you plan to reach out') +
+    sec('Type of Check-in', chips('types', CI_TYPES.map(function(x){ return [x, x]; }))) +
+    sec('How Are They?', chips('moods', CI_MOODS.map(function(x){ return [x[0], x[0], x[1]]; }))) +
+    sec('Additional Check-in Needed?', '<label class="dz-check"><input type="checkbox" class="chk" data-act="ci-again"' + (f ? ' checked' : '') + '> Yes, plan another check-in</label>' +
+      (f ? '<dl class="d-fields ci-follow"><div><dt>Date</dt><dd><input type="date" class="ctl" data-ff="date" value="' + esc(f.date) + '"></dd></div><div><dt>Time</dt><dd><input type="time" class="ctl" data-ff="time" value="' + esc(f.time || '') + '"></dd></div></dl>' +
+        '<p class="hint">' + (f.done ? 'That follow-up is already logged. ' : 'Adds a check-in with ' + esc(nm) + ' to your calendar and reminds you that day. ') + '<button type="button" class="dz-link" data-act="open" data-id="' + esc(f.id) + '">Open it</button></p>' : '')) +
+    '<section class="d-sec"><h3>Notes</h3><textarea class="d-desc" data-df="notes" placeholder="What you talked about, how they are doing, anything to follow up on…" aria-label="Notes">' + esc(it.notes) + '</textarea></section>' +
+    '<div class="d-foot">' + (draft ? '<span></span>' : '<button type="button" class="btn danger" data-act="d-del">Delete</button>') + '<button type="button" class="btn primary" data-act="close">Done</button></div>' +
   '</div>';
   dr.setAttribute('data-drawn', D.id);
   var sc = dr.querySelector('.d-scroll'); if(sc && prevTop) sc.scrollTop = prevTop;
@@ -3728,11 +3968,23 @@ document.addEventListener('click', function(e){
   if(t.tagName === 'SELECT' || (t.tagName === 'INPUT' && t.type === 'checkbox')) return; // handled on change
   switch(act){
     case 'open': e.preventDefault();
+      if(/^due:/.test(id || '')){ ciStartDue(id.slice(4), inDrawer && D.mode === 'day' ? D.date : null); break; }
       if(inDrawer && D.mode === 'dperson'){ var fp = D.id; openItem(id, null); D.fromP = fp; drawItem(); break; }
+      if(inDrawer && D.mode === 'item' && cmPerson(D.id) && getItem(id) && getItem(id).kind === 'checkin'){ var fcp = D.id; openItem(id, null); D.fromCP = fcp; drawItem(); break; }
       openItem(id, inDrawer && D.mode === 'day' ? D.date : (inDrawer && D.mode === 'item' ? D.from : null)); break;
     case 'day': if(e.target.closest('[data-act="open"]')) return; openDay(t.getAttribute('data-date')); break;
     case 'close': closeDrawer(); break;
     case 'd-back': if(D.from) { D = {mode:'day', date:D.from}; drawDay(); } break;
+    case 'd-backcp': if(D.fromCP && cmPerson(D.fromCP)) { D = {mode:'item', id:D.fromCP, from:null}; drawItem(); var cls = dr.querySelector('.cm-cisec'); if(cls) try { cls.scrollIntoView({block:'start'}); } catch(err){} } break;
+    case 'cm-log': cmLogNow(t.getAttribute('data-pid'), inDrawer && D.mode === 'item' && cmPerson(D.id) ? D.id : null); break;
+    case 'ci-log': var cli = getItem(D.id); if(cli){ ciLog(cli); save(); drawItem(); renderSoon(); } break;
+    case 'ci-undo': var cui = getItem(D.id); if(cui){ cui.done = false; cui.updated = Date.now(); save(); drawItem(); renderSoon(); } break;
+    case 'cm-color': var ccp = getItem(D.id); if(ccp && ccp.kind === 'person'){ setField(ccp, 'color', t.getAttribute('data-v')); save(); drawItem(); renderSoon(); } break;
+    case 'cm-goto':
+      var cgp = cmPerson(t.getAttribute('data-pid')); if(!cgp) break;
+      if(isClosed('cm:' + cgp.group)){ S.ui.closed['cm:' + cgp.group] = false; save(); render(); }
+      var cgc = main.querySelector('.cm-card[data-pid="' + cgp.id + '"]'); if(cgc){ scrollToEl(cgc); cgc.classList.remove('cm-flash'); void cgc.offsetWidth; cgc.classList.add('cm-flash'); }
+      break;
     case 'd-backp': if(D.fromP && dzPerson(D.fromP)) { D = {mode:'dperson', id:D.fromP}; drawDPerson(); var ls = dr.querySelector('.dz-entsec'); if(ls) try { ls.scrollIntoView({block:'start'}); } catch(err){} } break;
     case 'settings': openSettings(); break;
     case 'open-csync': openCSync(); break;
@@ -3749,7 +4001,7 @@ document.addEventListener('click', function(e){
     case 'import': importInput.click(); break;
     case 'snooze': S.ui.snooze = Date.now() + 7 * 864e5; save(); renderNotices(); break;
     case 'del': armed(t, function(){ removeItem(id); render(); }); break;
-    case 'd-del': armed(t, function(){ var d = D; removeItem(d.id); if(d.fromP && dzPerson(d.fromP)){ D = {mode:'dperson', id:d.fromP}; drawDPerson(); render(); } else if(d.from){ D = {mode:'day', date:d.from}; drawDay(); render(); } else closeDrawer(); }, 'Tap again to delete'); break;
+    case 'd-del': armed(t, function(){ var d = D; removeItem(d.id); if(d.fromP && dzPerson(d.fromP)){ D = {mode:'dperson', id:d.fromP}; drawDPerson(); render(); } else if(d.fromCP && cmPerson(d.fromCP)){ D = {mode:'item', id:d.fromCP, from:null}; drawItem(); render(); } else if(d.from){ D = {mode:'day', date:d.from}; drawDay(); render(); } else closeDrawer(); }, t.getAttribute('data-arm') || 'Tap again to delete'); break;
     case 'dismiss-rem': var it0 = getItem(id); if(it0){ it0.remDismissed = it0.reminder; save(); renderNotices(); } break;
     case 'show-done': var pg = t.getAttribute('data-page'); S.ui.showDone[pg] = !S.ui.showDone[pg]; save(); render(); break;
     case 'filter': var c = t.getAttribute('data-cat'); S.ui.hide[c] = !S.ui.hide[c]; save(); render(); break;
@@ -3925,6 +4177,7 @@ document.addEventListener('input', function(e){
       if(dyf === 'weather'){ var hi = dr.querySelector('.wx-h-ico'); if(hi) hi.innerHTML = wxIcon(D.date); }
       if(dyf !== 'world'){ var ds2 = document.getElementById('day-sum'); if(ds2) ds2.innerHTML = daySummaryHTML(D.date); }
       renderSoon(); } return; }
+  if(el.hasAttribute('data-ff')){ ciFollowField(el, true); return; }
   if(el.hasAttribute('data-df')){
     var it = getItem(D.id); if(!it) return;
     if(el.type === 'checkbox' || el.tagName === 'SELECT') return;
@@ -3974,9 +4227,22 @@ document.addEventListener('change', function(e){
   }
   if(el.hasAttribute('data-pk-newcat')){ pkAddCat(el, false); return; }
   if(el.hasAttribute('data-pk-trip')) return;
+  if(el.hasAttribute('data-ff')){ ciFollowField(el); return; }
+  if(el.getAttribute('data-act') === 'ci-again'){ var cai = getItem(D.id); if(cai){ ciFollowSet(cai, el.checked); save(); drawItem(); renderSoon(); } return; }
+  if(el.getAttribute('data-act') === 'ci-check'){ var cci = getItem(el.getAttribute('data-id')); if(cci){ if(el.checked) ciLog(cci); else { cci.done = false; cci.updated = Date.now(); } save(); render(); if(D.mode === 'item' && D.id === cci.id) drawItem(); } return; }
+  if(el.name === 'rhythm' && el.closest('form[data-form="cm-add"]')){ cmSyncAdd(); if(el.value === 'c'){ var rn = el.form.elements.rhyN; if(rn) try { rn.focus(); } catch(err){} } return; }
   if(el.hasAttribute('data-df')){
     var it = getItem(D.id); if(!it) return;
     var f = el.getAttribute('data-df');
+    if(it.kind === 'person' && (f === 'rhythm' || f === 'rhyN')){
+      if(f === 'rhythm' && el.value === 'c') it.rhyC = true; else { it.rhyC = f === 'rhyN'; setField(it, 'rhythm', el.value); }
+      it.updated = Date.now(); save(); drawItem(); renderSoon(); return;
+    }
+    if(it.kind === 'person' && f === 'group'){
+      setField(it, 'group', cmGroupNorm(el.value)); it.ord = cmSorted(it.group).filter(function(q){ return q !== it; }).reduce(function(m, q){ return Math.max(m, +q.ord || 0); }, 0) + 1;
+      save(); drawItem(); renderSoon(); return;
+    }
+    if(it.kind === 'person' && f === 'color'){ setField(it, 'color', el.value); save(); drawItem(); renderSoon(); return; }
     if(['amount','balance','original','minPay'].indexOf(f) >= 0 && String(el.value).trim() !== '') el.value = num(el.value).toFixed(2);
     if(f === 'apr' && String(el.value).trim() !== '') el.value = String(num(el.value));
     setField(it, f, el.type === 'checkbox' ? el.checked : el.value);
@@ -4070,6 +4336,16 @@ document.addEventListener('submit', function(e){
     newItem('task', {name:name, date:String(fd.get('date') || ''), page:pg});
     render();
     var mi = main.querySelector('[data-k="add:mt"]'); if(mi) try { mi.focus({preventScroll:true}); } catch(err){}
+  } else if(kind === 'cm-add'){
+    name = String(fd.get('name') || '').trim(); var cmn = form.querySelector('[name=name]');
+    if(!name){ cmn.focus(); return; }
+    var cmg = cmGroupNorm(fd.get('group')), cmr = String(fd.get('rhythm') || '30'), cmc = cmr === 'c', cml = String(fd.get('last') || '');
+    var cmp = newItem('person', {name:name, group:cmg, rhythm:cmc ? String(fd.get('rhyN') || '30') : cmr, rhyC:cmc});
+    if(validISO(cml)) newItem('checkin', {pid:cmp.id, date:cml, done:cml <= today()});
+    render();
+    var cnf = main.querySelector('form[data-form="cm-add"]');
+    if(cnf) cnf.insertAdjacentHTML('afterend', '<p class="added-note" role="status">✓ Added <b>' + esc(name) + '</b> to ' + esc(cmg) + '. <button type="button" class="linkbtn" data-act="cm-goto" data-pid="' + cmp.id + '">View card</button></p>');
+    var cagain = main.querySelector('[data-k="add:cm"]'); if(cagain) try { cagain.focus({preventScroll:true}); } catch(err){}
   } else if(kind === 'log-add'){
     var pi = getItem(D.id); if(!pi) return;
     var ld = String(fd.get('date') || ''); if(!validISO(ld)) ld = today();
@@ -4124,6 +4400,9 @@ document.addEventListener('submit', function(e){
 var DZ_DRAG = null;
 function dzOrderFromDom(grid){
   var ids = Array.prototype.map.call(grid.querySelectorAll('.dz-card[data-pid]'), function(c){ return c.getAttribute('data-pid'); });
+  if(grid.classList.contains('cm-grid')){
+    var ch = false; ids.forEach(function(id, i){ var q = cmPerson(id); if(q && +q.ord !== i + 1){ q.ord = i + 1; q.updated = Date.now(); ch = true; } }); return ch;
+  }
   var before = S.dating.people.map(function(p){ return p.id; }).join(',');
   S.dating.people.sort(function(a, b){ return ids.indexOf(a.id) - ids.indexOf(b.id); });
   return S.dating.people.map(function(p){ return p.id; }).join(',') !== before;
@@ -4169,6 +4448,12 @@ document.addEventListener('pointermove', function(e){
 document.addEventListener('pointerup', function(e){ if(DZ_DRAG && e.pointerId === DZ_DRAG.id) dzDragEnd(false); });
 document.addEventListener('pointercancel', function(e){ if(DZ_DRAG && e.pointerId === DZ_DRAG.id) dzDragEnd(false); });
 function dzMoveBy(pid, dir){
+  var cq = cmPerson(pid);
+  if(cq){
+    var CL = cmSorted(cq.group), ci = CL.indexOf(cq), cj = ci + dir; if(ci < 0 || cj < 0 || cj >= CL.length) return;
+    CL.splice(ci, 1); CL.splice(cj, 0, cq); CL.forEach(function(q, n){ q.ord = n + 1; }); cq.updated = Date.now(); save(); render();
+    var cg = main.querySelector('.dz-grip[data-pid="' + pid + '"]'); if(cg) try { cg.focus({preventScroll:true}); } catch(e){} return;
+  }
   var L = S.dating.people, i = -1;
   for(var k = 0; k < L.length; k++) if(L[k].id === pid) i = k;
   var j = i + dir; if(i < 0 || j < 0 || j >= L.length) return;
@@ -4188,7 +4473,15 @@ function sySave(){ try { if(SYS.on) localStorage.setItem(SY_KEY, JSON.stringify(
 function syDevice(){ var u = navigator.userAgent || ''; if(/iPad/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1)) return 'iPad'; if(/iPhone/.test(u)) return 'iPhone'; if(/Android/.test(u)) return 'Android'; if(/Mac/.test(u)) return 'Mac'; if(/Windows/.test(u)) return 'PC'; return 'computer'; }
 function h32(str){ var h = 0x811c9dc5; for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); }
 function syJ(v){ return JSON.stringify(v == null ? null : v); }
-function syPayload(st){ var o = {v:1, items:st.items}; SY_SECS.forEach(function(k){ o[k] = st[k]; }); return o; }
+var APP_V = 23;
+/* older planners only understand check-ins stored inside each person, so every person also carries a copy of theirs */
+function cmMirror(pid, items){
+  return items.filter(function(i){ return i.kind === 'checkin' && i.pid === pid && validISO(i.date); })
+    .sort(function(a, b){ return a.date.localeCompare(b.date) || (a.id < b.id ? -1 : a.id > b.id ? 1 : 0); })
+    .map(function(c){ return {id:c.id, ci:1, date:c.date, method:(c.types || [])[0] || '', note:c.notes || '', types:(c.types || []).slice(), moods:(c.moods || []).slice(), time:c.time || '', done:!!c.done, followId:c.followId || '', fromId:c.fromId || '',
+      reminder:c.reminder || '', reminderTime:c.reminderTime || '09:00', remDismissed:c.remDismissed || '', created:c.created || 0, updated:c.updated || 0}; });
+}
+function syPayload(st){ var o = {v:1, app:APP_V, items:st.items.map(function(i){ return i.kind === 'person' ? Object.assign({}, i, {logs:cmMirror(i.id, st.items)}) : i; })}; SY_SECS.forEach(function(k){ o[k] = st[k]; }); return o; }
 function syBase(pl){ var b = {sec:{}, items:{}}; SY_SECS.forEach(function(k){ b.sec[k] = h32(syJ(pl[k])); }); (pl.items || []).forEach(function(it){ b.items[it.id] = h32(syJ(it)); }); return b; }
 function syChanged(pl, base){
   if(!base) return true;
@@ -4309,6 +4602,7 @@ function syErrText(e){
   if(c === 401) return 'GitHub no longer accepts your key. Turn sync off and back on with a new key.';
   if(c === 403 || c === 404 || c === 'missing') return 'The synced copy can’t be reached on GitHub. Turn sync off and back on to reconnect.';
   if(c === 'lock') return 'Couldn’t unlock the synced copy. Turn sync off and back on, and enter your passphrase again.';
+  if(c === 'newer') return 'Another device has a newer version of the planner. Refresh this page to update it, then sync picks up again.';
   return 'Sync hit a problem and will try again (' + (c || (e && e.name) || 'error') + ').';
 }
 async function syncNow(){
@@ -4322,6 +4616,7 @@ async function syncNow(){
     if(!remote) throw syErr('missing');
     if(remote.rev !== SYS.rev){
       var R; try { R = await syDecrypt(SYS.key, remote); } catch(e){ throw syErr('lock'); }
+      if((+R.app || 0) > APP_V) throw syErr('newer');
       var L = syPayload(S), changed = syChanged(L, SYS.base);
       syApply(changed ? syMerge(L, R, SYS.base) : R);
       if(changed){ SYS.rev = ''; await syWrite(syPayload(S)); }
