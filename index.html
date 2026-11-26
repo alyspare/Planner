@@ -1192,10 +1192,19 @@ footer{margin-top:36px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2
 .dz-chap{margin-left:auto}
 .dz-chap + .dz-edit{margin-left:6px}
 /* Top 5 days glow on the calendars */
-.pv-cell.top5{position:relative;border-color:#F69396!important;box-shadow:0 0 0 2px rgba(246,147,150,.35),0 0 16px 3px rgba(246,147,150,.75);background:#FFFAFB}
-.pv-cell.top5::after{content:attr(data-top5);position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;color:#8E2C5D;background:#FDE1E2;border-radius:999px;padding:1px 6px;white-space:nowrap;pointer-events:none}
+.pv-cell.top5{position:relative;z-index:1;border-color:#F69396!important;box-shadow:0 0 0 2px #F69396,0 0 12px 3px #F69396,0 0 26px 8px rgba(246,147,150,.7);background:#FFF3F4}
+.pv-cell.top5::after{content:attr(data-top5);position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;color:#8E2C5D;background:#FDE1E2;border-radius:999px;padding:1px 6px;white-space:nowrap;pointer-events:none;box-shadow:0 0 8px rgba(246,147,150,.9)}
 .pv-mini .pv-cell.top5::after,.pv-biweek .pv-cell.top5::after{content:'★';padding:0 4px}
-.pv-chip.top5{box-shadow:0 0 0 2px #FFFDF8,0 0 0 3.5px #F69396,0 0 10px rgba(246,147,150,.9)}
+.pv-chip.top5{box-shadow:0 0 0 2px #FFFDF8,0 0 0 3.5px #F69396,0 0 12px 3px #F69396}
+.tb-it.top5{border-radius:10px;box-shadow:0 0 0 2px #F69396,0 0 14px 3px #F69396;background:#FFF3F4}
+.pv-cell.cutoff{position:relative;z-index:1;border-color:#E5262D!important;box-shadow:0 0 0 2px #E5262D,0 0 12px 3px #E5262D,0 0 26px 8px rgba(229,38,45,.5);background:#FFF4F4}
+.pv-cell.cutoff:not(.top5)::after{content:attr(data-cut);position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;color:#fff;background:#E5262D;border-radius:999px;padding:1px 6px;white-space:nowrap;pointer-events:none;box-shadow:0 0 8px rgba(229,38,45,.9)}
+.pv-mini .pv-cell.cutoff::after,.pv-biweek .pv-cell.cutoff::after{display:none}
+.pv-mini .pv-cell.top5{box-shadow:0 0 0 1.5px #F69396,0 0 7px 2px #F69396}
+.pv-mini .pv-cell.cutoff{box-shadow:0 0 0 1.5px #E5262D,0 0 7px 2px #E5262D}
+.pv-chip.cutoff{box-shadow:0 0 0 2px #FFFDF8,0 0 0 3.5px #E5262D,0 0 12px 3px #E5262D}
+.tb-it.cutoff{border-radius:10px;box-shadow:0 0 0 2px #E5262D,0 0 14px 3px #E5262D;background:#FFF4F4}
+.pv-chip.rls .cat-ico,.tb-it.rls .cat-ico{box-shadow:0 0 0 1.5px #FFFDF8,0 0 0 3px #2A8C9C,0 0 9px 3px #2A8C9C,0 0 16px 5px rgba(42,140,156,.5) !important}
 /* stickers */
 .stk{display:inline-block;flex:none;vertical-align:middle}
 .stk-star{width:30px;height:30px;overflow:visible;fill:#FFD60A;stroke:#FFB800;stroke-width:.8;stroke-linejoin:round;filter:drop-shadow(0 0 3px #FFF27A) drop-shadow(0 0 8px rgba(255,214,0,.95)) drop-shadow(0 0 16px rgba(255,200,0,.6))}
@@ -1290,7 +1299,8 @@ var KINDS = {
   dentry:{label:'Dating entry', code:'DATING'}, checkin:{label:'Check-in', code:'CHECK-IN'}
 };
 var DZ_TYPES = ['In-Person','Text','Phone Call','FaceTime','Socials'];
-var DZ_MARKS = ['No Text Back','No Show','Last Time Seen','Last Time Spoken','Date','Gifts Given','Gifts Received','Red Light Special'];
+var DZ_NEG = ['No Text Back','No Show','Cut Off','Cold Shoulder'];
+var DZ_MARKS = ['No Text Back','No Show','Cut Off','Cold Shoulder','Energy Shift','Last Time Seen','Last Time Spoken','Date','Gifts Given','Gifts Received','Red Light Special'];
 var DZ_FEEL = [['Smitten','🥰'],['Happy','😊'],['Excited','🤩'],['Butterflies','🦋'],['Calm','😌'],['Safe','🫶'],['Hopeful','🤞'],['Neutral','😐'],['Unsure','🤔'],
   ['Awkward','😬'],['Anxious','😟'],['Confused','😕'],['Disappointed','😞'],['Annoyed','🙄'],['Frustrated','😤'],['Sad','😢'],['Hurt','💔'],['Bored','😴']];
 var DZ_WHO = [], DZ_DATE = '';
@@ -2540,19 +2550,26 @@ function tbEntry(e){
     '<button type="button" class="mt-t" data-act="open" data-id="' + esc(it.id) + '">' + esc(entryTitle(e)) + (it.kind === 'task' && it.page === 'self' && it.stype ? '<span class="tb-st">' + esc(it.stype) + '</span>' : '') + '</button>' +
     '<span class="tb-d' + (late ? ' late' : '') + '">' + dl + (late ? ' · late' : '') + '</span>' + eTag(e) + '</li>';
 }
+/* calendar glows: Top 5 (Sugar Plum chapters) and Cut Off (dating calendars) */
+var CUTGLOW = false;
+function dzCut(it){ return !!it && it.kind === 'dentry' && (it.marks || []).indexOf('Cut Off') >= 0; }
+function dzRls(it){ return !!it && it.kind === 'dentry' && (it.marks || []).indexOf('Red Light Special') >= 0; }
+function dzRank(it){ var v = [+it.overall || 0, +it.likeness || 0].filter(function(x){ return x > 0; }); return v.length ? (v[0] + (v[1] || v[0])) / 2 : -1; }
+function glowCls(it){ return (TOP5[it.id] ? ' top5' : '') + (CUTGLOW && dzCut(it) ? ' cutoff' : '') + (CUTGLOW && dzRls(it) ? ' rls' : ''); }
 function tbChip(e){
   var it = e.it, fin = isFin(it), c = catOf(it), t = entryTitle(e);
-  return '<button type="button" class="pv-chip c-' + c + (TOP5[it.id] ? ' top5' : '') + (fin ? ' fin k-' + finCls(it) : '') + (entryDone(e) ? ' done' : '') + (it.priority ? ' p-' + it.priority : '') + '" data-act="open" data-id="' + esc(it.id) + '" title="' + esc(t + (it.priority ? ' · ' + it.priority + ' priority' : '')) + '">' +
+  return '<button type="button" class="pv-chip c-' + c + glowCls(it) + (fin ? ' fin k-' + finCls(it) : '') + (entryDone(e) ? ' done' : '') + (it.priority ? ' p-' + it.priority : '') + '" data-act="open" data-id="' + esc(it.id) + '" title="' + esc(t + (it.priority ? ' · ' + it.priority + ' priority' : '')) + '">' +
     itemIcon(it, 'xs') + '<span class="t">' + esc(t) + '</span></button>';
 }
 function tbPreview(pg, P, byDate){
+  CUTGLOW = pg === 'dating' || String(pg).indexOf('p-') === 0;
   if(P.t === 'year') return '';
   var t = today(), wantHabits = pg === 'self', showWx = P.t === 'week' || P.t === 'biweek';
   function habitBadge(d){ var n = wantHabits ? (S.habitLog[d] || []).length : 0; return n ? '<span class="pv-hb" title="' + plural(n, 'self-care check-off') + '">✓' + n + '</span>' : ''; }
   function cell(d, out, max){
-    var l = (byDate[d] || []).slice().sort(eSort), more = l.length - max;
-    var t5 = l.filter(function(e){ return TOP5[e.it.id]; }).map(function(e){ return TOP5[e.it.id]; }).sort()[0];
-    return '<div class="pv-cell' + (out ? ' out' : '') + (d === t ? ' today' : '') + (l.length ? ' has' : '') + (t5 ? ' top5' : '') + '"' + (t5 ? ' data-top5="Top 5 · #' + t5 + '"' : '') + ' data-act="day" data-date="' + d + '">' +
+    var l = (byDate[d] || []).slice().sort(CUTGLOW ? function(a, b){ return (dzRank(b.it) - dzRank(a.it)) || eSort(a, b); } : eSort), more = l.length - max;
+    var t5 = l.filter(function(e){ return TOP5[e.it.id]; }).map(function(e){ return TOP5[e.it.id]; }).sort()[0], cut = CUTGLOW && l.some(function(e){ return dzCut(e.it); });
+    return '<div class="pv-cell' + (out ? ' out' : '') + (d === t ? ' today' : '') + (l.length ? ' has' : '') + (t5 ? ' top5' : '') + (cut ? ' cutoff' : '') + '"' + (t5 ? ' data-top5="Top 5 · #' + t5 + '"' : '') + (cut ? ' data-cut="Cut off"' : '') + ' data-act="day" data-date="' + d + '">' +
       '<div class="pv-top"><span class="pv-n">' + parse(d).d + (wantHabits ? pdDot(d) : '') + '</span>' + habitBadge(d) + '</div>' + (showWx && wxText(d) ? '<span class="pv-cwx">' + wxIcon(d) + esc(wxText(d)) + '</span>' : '') +
       '<div class="pv-chips">' + l.slice(0, max).map(tbChip).join('') + (more > 0 ? '<span class="pv-more">+' + more + '</span>' : '') + '</div></div>';
   }
@@ -2562,7 +2579,7 @@ function tbPreview(pg, P, byDate){
     var hb = wantHabits && S.habits.length ? '<div class="pv-habits">' + S.habits.map(function(h){ var on = (S.habitLog[d] || []).indexOf(h.id) >= 0;
       return '<button type="button" class="tb-hb' + (on ? ' on' : '') + '" data-act="habit" data-hid="' + h.id + '" data-date="' + d + '" aria-pressed="' + on + '">' + (on ? '✓ ' : '') + esc(h.name || 'Treatment') + '</button>'; }).join('') + '</div>' : '';
     return '<div class="pv-frame"' + frameStyle + '><div class="pv169 pv-day"><button type="button" class="pv-date" data-act="day" data-date="' + d + '"><span class="pv-dow">' + DOW_FULL[dowOf(d)] + '</span><b>' + parse(d).d + (wantHabits ? pdDot(d) : '') + '</b><span>' + MONTHS[parse(d).m-1] + ' ' + parse(d).y + '</span>' + (w ? '<span class="pv-wx">' + wxIcon(d) + esc(w) + '</span>' : '') + '</button>' +
-      '<div class="pv-dlist">' + (l.length ? '<ul class="tb-list">' + l.map(tbEntry).join('') + '</ul>' : '<p class="empty" style="padding:4px 0">Nothing on this day.</p>') + (hb ? '<p class="mt-h">Weekly Self-Care</p>' + hb : '') + '</div></div></div>';
+      '<div class="pv-dlist">' + (l.length ? '<ul class="tb-list">' + l.map(function(e){ return tbEntry(e).replace('<li class="tb-it', '<li class="tb-it' + glowCls(e.it)); }).join('') + '</ul>' : '<p class="empty" style="padding:4px 0">Nothing on this day.</p>') + (hb ? '<p class="mt-h">Weekly Self-Care</p>' + hb : '') + '</div></div></div>';
   }
   if(P.t === 'week' || P.t === 'biweek'){
     var days = P.t === 'week' ? 7 : 14, h = '';
@@ -2736,7 +2753,7 @@ function dzPerson(id){ for(var i = 0; i < S.dating.people.length; i++) if(S.dati
 function dzWho(it){ var ids = it.who || []; return S.dating.people.filter(function(p){ return ids.indexOf(p.id) >= 0; }).map(function(p){ return p.ini || '?'; }); }
 function dzTitle(it){
   var w = dzWho(it), mk = it.marks || [], ty = it.types || [];
-  var what = mk.indexOf('Date') >= 0 ? 'Date' : mk.indexOf('No Show') >= 0 ? 'No Show' : mk.indexOf('No Text Back') >= 0 ? 'No Text Back' : ty.length ? ty.slice(0, 2).join(' + ') : (mk[0] || 'Entry');
+  var what = mk.indexOf('Cut Off') >= 0 ? 'Cut Off' : mk.indexOf('Date') >= 0 ? 'Date' : mk.indexOf('No Show') >= 0 ? 'No Show' : mk.indexOf('No Text Back') >= 0 ? 'No Text Back' : ty.length ? ty.slice(0, 2).join(' + ') : (mk[0] || 'Entry');
   return (w.length ? w.join(' & ') : 'Dating') + ' · ' + what;
 }
 function dzHas(e, f, v){ return (e[f] || []).indexOf(v) >= 0; }
@@ -3437,6 +3454,7 @@ function render(){
     });
   });
   renderNav(); renderNotices();
+  var holdH = main.offsetHeight; main.style.minHeight = holdH + 'px';
   main.innerHTML = pageHTML(cur);
   keep.forEach(function(kv){
     var f = Array.prototype.filter.call(main.querySelectorAll('form[data-form]'), function(x){ return formKey(x) === kv[0]; })[0], el = f && f.elements[kv[1]];
@@ -3444,13 +3462,23 @@ function render(){
   });
   cmSyncAdd();
   afterRender();
+  main.style.minHeight = '';
   if(k){
     var el = main.querySelector('[data-k="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]');
     if(el){ try { el.focus({preventScroll:true}); if(sel && el.setSelectionRange) el.setSelectionRange(sel[0], sel[1]); } catch(e){} }
   }
 }
 function afterRender(){}
-function growAny(t){ if(!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
+/* resizing a text box to fit must never move the page: Safari (iPad, iPhone) clamps the scroll position
+   while the box is briefly collapsed, so remember every scrolled parent and put it back */
+function keepScroll(t, fn){
+  var keep = [], n = t && t.parentElement, wy = window.pageYOffset, wx = window.pageXOffset;
+  while(n && n !== document.body && n !== document.documentElement){ if(n.scrollTop) keep.push([n, n.scrollTop]); n = n.parentElement; }
+  fn();
+  keep.forEach(function(k){ if(k[0].scrollTop !== k[1]) k[0].scrollTop = k[1]; });
+  if(window.pageYOffset !== wy) window.scrollTo(wx, wy);
+}
+function growAny(t){ if(!t) return; keepScroll(t, function(){ t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }); }
 var mainTimer = null;
 function renderSoon(){ clearTimeout(mainTimer); mainTimer = setTimeout(render, 180); }
 function route(){
@@ -3704,7 +3732,7 @@ function drawDating(it, prevTop){
     sec('Involvement', chips('who', S.dating.people.map(function(p){ return [p.id, p.ini || '?', p.color ? '<span class="dz-dot" style="background:' + p.color + '"></span>' : '']; }))) +
     sec('Overall Scale', scale('overall', 'Rough', 'Amazing'), 'How the interaction went') +
     sec('Interaction Type', chips('types', plain(DZ_TYPES))) +
-    sec('Dating Marks', chips('marks', plain(DZ_MARKS), ['No Text Back', 'No Show'])) +
+    sec('Dating Marks', chips('marks', plain(DZ_MARKS), DZ_NEG)) +
     sec('Stayed The Night', '<label class="dz-check"><input type="checkbox" class="chk" data-df="stayed"' + (it.stayed ? ' checked' : '') + '> Yes, stayed the night</label>' +
       (it.stayed ? '<dl class="d-fields dz-left"><div><dt>Date Left</dt><dd><input type="date" class="ctl" data-df="left" value="' + esc(it.left || '') + '"' + (validISO(it.date) ? ' min="' + it.date + '"' : '') + '></dd></div></dl><p class="hint">The day he left counts as the last time you saw him.</p>' : '')) +
     sec('Current Feelings', chips('feelings', DZ_FEEL.map(function(x){ return [x[0], x[0], x[1]]; }))) +
@@ -3718,8 +3746,11 @@ function drawDating(it, prevTop){
     '<div class="d-foot"><button type="button" class="btn danger" data-act="d-del">Delete</button><button type="button" class="btn primary" data-act="close">Done</button></div>' +
   '</div>';
   dr.setAttribute('data-drawn', D.id);
-  setTimeout(function(){ Array.prototype.forEach.call(dr.querySelectorAll('.dz-lta, .dz-mtitle'), growAny); }, 0);
-  var sc = dr.querySelector('.d-scroll'); if(sc && prevTop) sc.scrollTop = prevTop;
+  var sc = dr.querySelector('.d-scroll'), dzTas = function(){ Array.prototype.forEach.call(dr.querySelectorAll('.dz-lta, .dz-mtitle'), growAny); };
+  if(!dr.hidden) dzTas();
+  if(sc && prevTop) sc.scrollTop = prevTop;
+  var drawnId = D.id;
+  setTimeout(function(){ dzTas(); var s2 = dr.querySelector('.d-scroll'); if(s2 && prevTop && D.id === drawnId && s2.scrollTop < prevTop) s2.scrollTop = prevTop; }, 0);
 }
 function cmSwatches(p){
   return '<div class="dz-swatches" role="group" aria-label="Icon color">' + DZ_COLORS.map(function(c){ return '<button type="button" class="dz-sw" data-act="cm-color" data-v="' + c[0] + '" aria-pressed="' + ((p.color || '') === c[0]) + '"><span class="sw" style="background:' + (c[0] || 'var(--community-mid)') + '"></span>' + c[1] + '</button>'; }).join('') +
@@ -3970,7 +4001,7 @@ function drawSettings(){
         '<button type="button" class="btn danger" data-act="reset-all">Erase everything on this device</button></section>' +
     '</div>';
 }
-function grow(t){ if(!t || dr.hidden) return; t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight, 38) + 'px'; }
+function grow(t){ if(!t || dr.hidden) return; keepScroll(t, function(){ t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight, 38) + 'px'; }); }
 
 /* ---------- file helpers ---------- */
 function download(text, name, type){
