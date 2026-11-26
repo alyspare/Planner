@@ -1,6 +1,6 @@
 {
-  "name": "Sugar Plum",
-  "short_name": "Sugar Plum",
+  "name": "Personal Planner",
+  "short_name": "Planner",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
