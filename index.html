@@ -470,6 +470,10 @@ a.btn{text-decoration:none}
 .cat-ico{display:inline-grid;place-items:center;width:18px;height:18px;border-radius:5px;flex:none;color:#fff}
 .cat-ico svg{width:12px;height:12px;display:block;filter:drop-shadow(0 0 .6px rgba(0,0,0,.35))}
 .cat-ico.sm{width:14px;height:14px;border-radius:4px}
+.ci-dreams{background:#1D6990;color:#F6D77B}
+nav.pages a.ext{opacity:.92}
+@media (max-width:640px){.dj-top{display:none}}
+nav.pages a.ext:hover{opacity:1}
 .cat-ico.sm svg{width:9px;height:9px}
 .ci-goal{background:var(--goal-mid);box-shadow:0 0 0 1px #C4505B,0 0 6px rgba(150,40,50,.55)}
 .ci-self{background:var(--self-mid);box-shadow:0 0 0 1px #145B66,0 0 6px rgba(15,80,90,.55)}
@@ -1181,6 +1185,35 @@ footer{margin-top:36px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2
   nav.pages,.top-r,#notices,.add-row,.acts,footer,.bar.sticky .btn{display:none !important}
   .page-head{color:var(--ink)}
 }
+
+/* ---- shared with the Dating Journal ---- */
+.dz-headbtns{display:flex;align-items:flex-start;gap:10px}
+.dz-headbtns .dzj-open{margin-top:22px;white-space:nowrap}
+.dz-chap{margin-left:auto}
+.dz-chap + .dz-edit{margin-left:6px}
+/* Top 5 days glow on the calendars */
+.pv-cell.top5{position:relative;border-color:#F69396!important;box-shadow:0 0 0 2px rgba(246,147,150,.35),0 0 16px 3px rgba(246,147,150,.75);background:#FFFAFB}
+.pv-cell.top5::after{content:attr(data-top5);position:absolute;top:6px;right:6px;font-size:10px;font-weight:700;color:#8E2C5D;background:#FDE1E2;border-radius:999px;padding:1px 6px;white-space:nowrap;pointer-events:none}
+.pv-mini .pv-cell.top5::after,.pv-biweek .pv-cell.top5::after{content:'★';padding:0 4px}
+.pv-chip.top5{box-shadow:0 0 0 2px #FFFDF8,0 0 0 3.5px #F69396,0 0 10px rgba(246,147,150,.9)}
+/* stickers */
+.stk{display:inline-block;flex:none;vertical-align:middle}
+.stk-star{width:30px;height:30px;overflow:visible;fill:#FFD60A;stroke:#FFB800;stroke-width:.8;stroke-linejoin:round;filter:drop-shadow(0 0 3px #FFF27A) drop-shadow(0 0 8px rgba(255,214,0,.95)) drop-shadow(0 0 16px rgba(255,200,0,.6))}
+.stk-bang{font-weight:700;font-size:24px;line-height:1;letter-spacing:-.02em;color:#FF2D2D;transform:rotate(-6deg);text-shadow:0 0 4px #FF6B6B,0 0 10px rgba(255,30,30,.9),0 0 20px rgba(255,30,30,.6)}
+.stk.sm.stk-star{width:22px;height:22px}.stk.sm.stk-bang{font-size:18px}
+.dz-stks{display:flex;gap:10px;flex-wrap:wrap}
+.dz-stkb{width:88px;height:58px;border-radius:12px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
+.dz-stkb[aria-pressed="true"]{border:2px solid var(--bg);background:#FDE1E2}
+/* lined write-up boxes */
+.dz-mtitle{font-weight:700}
+.dz-mhint{margin:-4px 0 8px}
+.dz-lined{background:#FFFDF8}
+.dz-lined h3 span{font-weight:500}
+.dz-lf{display:block;padding:4px 0 10px;border-bottom:1px solid #F3C4CB}
+.dz-lf > span{display:block;font-weight:700;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent-ink);line-height:32px}
+.dz-lta{display:block;width:100%;box-sizing:border-box;border:0;padding:0;margin:0;background:transparent repeating-linear-gradient(180deg,transparent 0,transparent 31px,#F6DCE0 31px,#F6DCE0 32px);font:inherit;font-size:16px;line-height:32px;color:var(--ink);resize:none;min-height:64px;overflow:hidden}
+.dz-lta:focus{outline:2px solid rgba(142,44,93,.35);outline-offset:2px;border-radius:4px}
+
 </style>
 </head>
 <body>
@@ -1198,6 +1231,7 @@ footer{margin-top:36px;padding-top:16px;border-top:1px solid rgba(255,255,255,.2
     <div class="brand"><span class="mark" aria-hidden="true">P</span><span>Personal Planner <span class="sub2">· 2023–2028</span></span></div>
     <div class="top-r">
       <span class="sync" id="sync" role="status"><i></i><span>Saved on this device</span></span>
+      <a class="btn ghost sm dj-top" id="dj-top" href="https://alyspare.github.io/Dreams/" target="_blank" rel="noopener noreferrer">Dreams Journal <span aria-hidden="true">↗</span></a>
       <button class="btn ghost sm" type="button" data-act="settings">Backup</button>
     </div>
   </header>
@@ -1260,6 +1294,10 @@ var DZ_MARKS = ['No Text Back','No Show','Last Time Seen','Last Time Spoken','Da
 var DZ_FEEL = [['Smitten','🥰'],['Happy','😊'],['Excited','🤩'],['Butterflies','🦋'],['Calm','😌'],['Safe','🫶'],['Hopeful','🤞'],['Neutral','😐'],['Unsure','🤔'],
   ['Awkward','😬'],['Anxious','😟'],['Confused','😕'],['Disappointed','😞'],['Annoyed','🙄'],['Frustrated','😤'],['Sad','😢'],['Hurt','💔'],['Bored','😴']];
 var DZ_WHO = [], DZ_DATE = '';
+/* the write-up under each entry (Dating Journal); every one is optional */
+var DZ_DETAILS = [['dMoment','The moment','Where you were and what you did'],['dTalk','What we talked about','Topics, plans, inside jokes'],['dFelt','How I felt','In the moment and after'],['dLearn','What I learned about him','Something new about who he is'],['dGreen','Green flags','What felt right'],['dWatch','Things to watch','Anything that gave you pause'],['dGifts','Gifts given or received','What, and how it landed'],['dFav','Favorite moment or quote','The line or moment you want to keep'],['dNext','Next time','What to ask, try or remember']];
+var DZ_STK = [['star','Gold star'],['bang','Red !!!']];
+var JOURNAL = false, TOP5 = {};
 var STATUS = {
   trip:['Dreaming','Planning','Booked','Completed'],
   post:['Idea','Drafting','Scheduled','Posted'],
@@ -1293,6 +1331,15 @@ var CI_OLD = {'Video call':'FaceTime', 'Card or gift':'Card/Gift', 'Social media
 var CI_MOODS = [['Happy','😊'],['Excited','🤩'],['Grateful','🙏'],['Loved','🥰'],['Calm','😌'],['Proud','💪'],['Hopeful','🌱'],['Busy','📅'],['Tired','😴'],['Stressed','😣'],['Anxious','😟'],['Overwhelmed','😵‍💫'],['Sad','😢'],['Lonely','🥺'],['Frustrated','😤'],['Sick','🤒'],['Grieving','💔']];
 var METHODS = ['Call','Text','Video call','Visit','Card or gift','Social media','Other'];
 var CP_URL = 'https://claude.ai/artifact/ELXGWDWRfWoaL3LaCp7D2t';
+/* Dreams Journal lives in its own repo; the address is kept per device */
+var DJ_KEY = 'personalPlanner.dreamsUrl', DJ_DEF = 'https://alyspare.github.io/Dreams/';
+function djUrl(){ return xUrl(XLINKS[0]); }
+var DZJ_KEY = 'personalPlanner.datingUrl', DZJ_DEF = 'https://alyspare.github.io/SugarPlum/';
+/* the other apps this one links to; the Dating Journal swaps in its own list */
+var XLINKS = [{key:DJ_KEY, def:DJ_DEF, name:'Dreams Journal', repo:'Dreams'}, {key:DZJ_KEY, def:DZJ_DEF, name:'Sugar Plum', repo:'SugarPlum'}];
+function xUrl(L){ try { var u = localStorage.getItem(L.key); if(u && /^https:\/\/\S+$/.test(u)) return u; } catch(e){} return L.def; }
+function dzjUrl(){ return xUrl(XLINKS[1]); }
+var DJ_ICO = '<span class="cat-ico ci-dreams sm" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg></span>';
 var CP_STATUSES = ['Idea','Drafting','In Progress','Scheduled','Published'];
 var CP_STATUS_CLS = {Idea:'st-idea',Drafting:'st-draft','In Progress':'st-prog',Scheduled:'st-sched',Published:'st-ok'};
 var BELL = '<svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.6a4.3 4.3 0 0 0-4.3 4.3v2.5L2.4 11h11.2l-1.3-2.6V5.9A4.3 4.3 0 0 0 8 1.6zM6.3 12.4a1.8 1.8 0 0 0 3.4 0" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>';
@@ -1357,7 +1404,7 @@ function pkMigrate(p){
 
 /* ---------- dating people ---------- */
 var DZ_DEFAULT = [['ad','AD'],['aem','AEM'],['jl','JL'],['sol','SOL'],['misc','Misc']];
-var DZ_PFIELDS = ['name','met','bday','age','likes','dislikes','ptype','prevDates','prevGiven','prevRecv','notes','color'];
+var DZ_PFIELDS = ['name','met','bday','age','likes','dislikes','ptype','prevDates','prevGiven','prevRecv','notes','color','wMet','wAdore','wPause','wHead'];
 var DZ_COLORS = [['','Default','#5A1838'],['#1F1F1F','Black'],['#1E3A8A','Dark Blue'],['#1F5132','Dark Green'],['#5B5B5F','Grey'],['#B3261E','Red']];
 function dzBlankPerson(id, ini, misc){ var o = {id:id, ini:ini, misc:!!misc}; DZ_PFIELDS.forEach(function(f){ o[f] = ''; }); return o; }
 function dzDefault(){ return {people:DZ_DEFAULT.map(function(x){ return dzBlankPerson(x[0], x[1], x[0] === 'misc'); })}; }
@@ -1393,7 +1440,7 @@ function vNorm(d){
 /* ---------- state ---------- */
 function blank(){
   var t = parse(today()), y = clampY(t.y), m = t.y < MIN_Y ? 1 : t.y > MAX_Y ? 12 : t.m;
-  return {v:1, items:[], habits:[], habitLog:{}, days:{}, content:{posts:[], synced:'', importedAt:0}, packing:pkDefault(), dating:dzDefault(), period:prDefault(), vitals:[], lastBackup:0,
+  return {v:1, items:[], habits:[], habitLog:{}, days:{}, content:{posts:[], synced:'', importedAt:0}, packing:pkDefault(), dating:dzDefault(), period:prDefault(), vitals:[], dzBacklog:{items:[], done:{}}, lastBackup:0,
     ui:{yY:y, mY:y, mM:m, bY:y, bM:m, hWeek:'', hide:{}, showDone:{}, snooze:0, debtMethod:'snowball', debtBudget:0}};
 }
 function normalize(d){
@@ -1420,7 +1467,9 @@ function normalize(d){
       it.group = cmGroupNorm(it.group); it.rhythm = String(cmRhythm(it)); it.rhyC = !!x.rhyC; it.color = /^#[0-9a-fA-F]{6}$/.test(x.color || '') ? x.color : '';
       ['favColor','favFood','contact'].forEach(function(k){ it[k] = String(x[k] || ''); }); it.lastSeen = validISO(x.lastSeen) ? x.lastSeen : ''; it.birthday = validISO(x.birthday) ? x.birthday : ''; it.ord = isFinite(+x.ord) ? +x.ord : 0; }
     if(it.kind === 'checkin'){ it.pid = String(x.pid || ''); ['types','moods'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.time = /^\d{2}:\d{2}$/.test(x.time || '') ? x.time : ''; it.done = !!x.done; it.followId = String(x.followId || ''); it.fromId = String(x.fromId || ''); }
-    if(it.kind === 'dentry'){ ['who','types','marks','feelings'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.recurring = !!x.recurring; it.issue = String(x.issue || ''); it.overall = String(x.overall || ''); it.likeness = String(x.likeness || ''); it.stayed = !!x.stayed; it.left = validISO(x.left) ? x.left : ''; }
+    if(it.kind === 'dentry'){ ['who','types','marks','feelings'].forEach(function(k){ it[k] = Array.isArray(x[k]) ? x[k].map(String) : []; }); it.recurring = !!x.recurring; it.issue = String(x.issue || ''); it.overall = String(x.overall || ''); it.likeness = String(x.likeness || ''); it.stayed = !!x.stayed; it.left = validISO(x.left) ? x.left : '';
+      it.title = String(x.title || ''); it.reflect = !!x.reflect; it.stk = (Array.isArray(x.stk) ? x.stk : []).filter(function(v){ return v === 'star' || v === 'bang'; });
+      DZ_DETAILS.forEach(function(f){ it[f[0]] = String(x[f[0]] || ''); }); }
     return it;
   });
   /* check-ins used to live inside each person; give each one its own entry (same id on every device) */
@@ -1450,7 +1499,19 @@ function normalize(d){
   s.dating = dzNorm(d.dating);
   s.period = prNorm(d.period);
   s.vitals = vNorm(d.vitals);
+  s.dzBacklog = blNorm(d.dzBacklog);
   return s;
+}
+function blNorm(b){
+  var out = {items:[], done:{}}; if(!b || typeof b !== 'object') return out;
+  if(b.done && typeof b.done === 'object') Object.keys(b.done).forEach(function(k){ out.done[k] = +b.done[k] || 1; });
+  var arr = function(v){ return Array.isArray(v) ? v.map(String) : []; };
+  out.items = (Array.isArray(b.items) ? b.items : []).filter(function(x){ return x && x.id && !out.done[x.id]; }).map(function(x){
+    var o = {id:String(x.id), date:validISO(x.date) ? x.date : today(), title:String(x.title || ''), text:String(x.text || ''), who:arr(x.who), types:arr(x.types), marks:arr(x.marks), feelings:arr(x.feelings), stk:arr(x.stk),
+      overall:String(x.overall || ''), likeness:String(x.likeness || ''), stayed:!!x.stayed, left:validISO(x.left) ? x.left : '', also:arr(x.also), nodate:!!x.nodate, created:+x.created || 0, updated:+x.updated || 0};
+    var sg = x.sug && typeof x.sug === 'object' ? x.sug : {}; o.sug = {types:arr(sg.types), marks:arr(sg.marks), feelings:arr(sg.feelings), stayed:!!sg.stayed}; return o;
+  });
+  return out;
 }
 var storageOK = true;
 function load(){
@@ -1533,7 +1594,8 @@ function newItem(kind, props){
   if(kind === 'person'){ it.group = cmGroupNorm(it.group || 'Friends'); it.rhythm = String(cmRhythm(it)); it.rhyC = !!it.rhyC; it.birthday = it.birthday || ''; it.contact = ''; it.logs = []; it.color = ''; it.favColor = ''; it.favFood = ''; it.lastSeen = '';
     if(!isFinite(+it.ord) || it.ord === undefined) it.ord = S.items.filter(function(q){ return q.kind === 'person' && q.group === it.group; }).reduce(function(m, q){ return Math.max(m, +q.ord || 0); }, 0) + 1; }
   if(kind === 'checkin'){ it.pid = it.pid || ''; it.types = it.types || []; it.moods = it.moods || []; it.time = it.time || ''; it.done = !!it.done; it.followId = ''; it.fromId = it.fromId || ''; }
-  if(kind === 'dentry'){ it.who = Array.isArray(it.who) ? it.who : []; it.types = []; it.marks = []; it.feelings = []; it.overall = ''; it.likeness = ''; it.recurring = false; it.issue = ''; it.stayed = false; it.left = ''; }
+  if(kind === 'dentry'){ it.who = Array.isArray(it.who) ? it.who : []; it.types = []; it.marks = []; it.feelings = []; it.overall = ''; it.likeness = ''; it.recurring = false; it.issue = ''; it.stayed = false; it.left = ''; it.title = it.title || ''; it.reflect = !!it.reflect; it.stk = Array.isArray(it.stk) ? it.stk : [];
+    DZ_DETAILS.forEach(function(f){ it[f[0]] = String(it[f[0]] || ''); }); }
   S.items.push(it); save();
   return it;
 }
@@ -1880,7 +1942,7 @@ function collect(start, end, useFilter, noDating){
     (map[d] || (map[d] = [])).push(e);
   }
   S.items.forEach(function(it){
-    if(it.kind === 'dentry' && noDating) return;
+    if(it.kind === 'dentry' && (noDating || it.reflect)) return;
     if(it.kind === 'person'){ personEntries(it, start, end, put); return; }
     if(it.kind === 'checkin' && !cmPerson(it.pid)) return;
     if(it.kind === 'trip' || it.kind === 'event'){
@@ -2480,7 +2542,7 @@ function tbEntry(e){
 }
 function tbChip(e){
   var it = e.it, fin = isFin(it), c = catOf(it), t = entryTitle(e);
-  return '<button type="button" class="pv-chip c-' + c + (fin ? ' fin k-' + finCls(it) : '') + (entryDone(e) ? ' done' : '') + (it.priority ? ' p-' + it.priority : '') + '" data-act="open" data-id="' + esc(it.id) + '" title="' + esc(t + (it.priority ? ' · ' + it.priority + ' priority' : '')) + '">' +
+  return '<button type="button" class="pv-chip c-' + c + (TOP5[it.id] ? ' top5' : '') + (fin ? ' fin k-' + finCls(it) : '') + (entryDone(e) ? ' done' : '') + (it.priority ? ' p-' + it.priority : '') + '" data-act="open" data-id="' + esc(it.id) + '" title="' + esc(t + (it.priority ? ' · ' + it.priority + ' priority' : '')) + '">' +
     itemIcon(it, 'xs') + '<span class="t">' + esc(t) + '</span></button>';
 }
 function tbPreview(pg, P, byDate){
@@ -2489,11 +2551,12 @@ function tbPreview(pg, P, byDate){
   function habitBadge(d){ var n = wantHabits ? (S.habitLog[d] || []).length : 0; return n ? '<span class="pv-hb" title="' + plural(n, 'self-care check-off') + '">✓' + n + '</span>' : ''; }
   function cell(d, out, max){
     var l = (byDate[d] || []).slice().sort(eSort), more = l.length - max;
-    return '<div class="pv-cell' + (out ? ' out' : '') + (d === t ? ' today' : '') + (l.length ? ' has' : '') + '" data-act="day" data-date="' + d + '">' +
+    var t5 = l.filter(function(e){ return TOP5[e.it.id]; }).map(function(e){ return TOP5[e.it.id]; }).sort()[0];
+    return '<div class="pv-cell' + (out ? ' out' : '') + (d === t ? ' today' : '') + (l.length ? ' has' : '') + (t5 ? ' top5' : '') + '"' + (t5 ? ' data-top5="Top 5 · #' + t5 + '"' : '') + ' data-act="day" data-date="' + d + '">' +
       '<div class="pv-top"><span class="pv-n">' + parse(d).d + (wantHabits ? pdDot(d) : '') + '</span>' + habitBadge(d) + '</div>' + (showWx && wxText(d) ? '<span class="pv-cwx">' + wxIcon(d) + esc(wxText(d)) + '</span>' : '') +
       '<div class="pv-chips">' + l.slice(0, max).map(tbChip).join('') + (more > 0 ? '<span class="pv-more">+' + more + '</span>' : '') + '</div></div>';
   }
-  var frameStyle = ' style="--pvbg:var(--' + TB_CAT[pg] + '-bg)"';
+  var frameStyle = ' style="--pvbg:var(--' + (TB_CAT[pg] || 'dating') + '-bg)"';
   if(P.t === 'day'){
     var d = P.start, l = (byDate[d] || []).slice().sort(eSort), w = wxText(d);
     var hb = wantHabits && S.habits.length ? '<div class="pv-habits">' + S.habits.map(function(h){ var on = (S.habitLog[d] || []).indexOf(h.id) >= 0;
@@ -2681,7 +2744,9 @@ function dzInPerson(e){ return !dzHas(e, 'marks', 'No Show') && (!!e.stayed || d
 function dzSeen(e){ return dzInPerson(e) || (dzHas(e, 'marks', 'Last Time Seen') && !dzHas(e, 'marks', 'No Show')); }
 function dzSeenDates(e){ var out = []; if(dzSeen(e)) out.push(e.date); if(e.stayed && !dzHas(e, 'marks', 'No Show') && validISO(e.left) && e.left >= e.date) out.push(e.left); return out; }
 function dzTouches(e){ return dzHas(e, 'marks', 'No Show') || dzHas(e, 'marks', 'No Text Back') ? 0 : (e.types || []).length; }
-function dzEntriesFor(pid){ return S.items.filter(function(i){ return i.kind === 'dentry' && validISO(i.date) && (i.who || []).indexOf(pid) >= 0; }); }
+function dzEntriesFor(pid){ return S.items.filter(function(i){ return i.kind === 'dentry' && !i.reflect && validISO(i.date) && (i.who || []).indexOf(pid) >= 0; }); }
+function dzAllFor(pid){ return S.items.filter(function(i){ return i.kind === 'dentry' && validISO(i.date) && (i.who || []).indexOf(pid) >= 0; }); }
+function dzName(it){ return String(it.title || '').trim() || dzTitle(it); }
 function dzDur(a, b){
   var A = parse(a), B = parse(b), months = (B.y - A.y) * 12 + (B.m - A.m) - (B.d < A.d ? 1 : 0);
   if(months < 1){ var dd = daysBetween(a, b); return dd + (dd === 1 ? ' day' : ' days'); }
@@ -2745,6 +2810,7 @@ function dzCard(p){
   return '<article class="card sm-card dz-card" data-pid="' + esc(p.id) + '" style="border-top-color:' + (p.color || 'var(--dating-mid)') + '"><div class="sm-head">' +
     '<button type="button" class="dz-grip" data-pid="' + esc(p.id) + '" aria-label="Move ' + esc(p.ini || 'person') + '. Drag, or use the arrow keys." title="Drag to move"><svg viewBox="0 0 10 16" aria-hidden="true"><g fill="currentColor"><circle cx="2.5" cy="2.5" r="1.5"/><circle cx="7.5" cy="2.5" r="1.5"/><circle cx="2.5" cy="8" r="1.5"/><circle cx="7.5" cy="8" r="1.5"/><circle cx="2.5" cy="13.5" r="1.5"/><circle cx="7.5" cy="13.5" r="1.5"/></g></svg></button>' +
     dzPIcon(p) + '<h3>' + esc(p.ini || '?') + (p.name ? ' <span class="dz-name">' + esc(p.name) + '</span>' : '') + '</h3>' +
+      (JOURNAL && !p.misc ? '<a class="btn sm dz-chap" href="#p-' + esc(p.id) + '">Chapter ›</a>' : '') +
       '<button type="button" class="btn sm dz-edit" data-act="dz-person" data-pid="' + esc(p.id) + '" aria-label="Edit ' + esc(p.ini || 'person') + '">Edit</button></div>' +
     '<div class="sm-big"><b>' + all.length + '</b><span>' + (all.length === 1 ? 'entry' : 'entries') + ' · all time</span></div>' +
     '<ul class="sm-stats">' + stats.map(function(x){ return '<li><span>' + x[0] + '</span><b>' + x[1] + '</b></li>'; }).join('') + '</ul>' +
@@ -3037,10 +3103,10 @@ function dzPIcon(p, cls){ return '<span class="cat-ico ci-dating' + (p && p.colo
 function dzItemStyle(it){ if(it && (it.kind === 'person' || it.kind === 'checkin')) return cmItemStyle(it); if(!it || it.kind !== 'dentry') return {cls:'', style:''}; var q = dzItemPerson(it); return q && q.color ? {cls:' pc', style:dzPStyle(q)} : {cls:'', style:''}; }
 
 /* ---------- dating: summary of an person's detailed descriptions ---------- */
-var DZ_STOP_X = ('went said told felt feel feeling feels like just really also then very much even still some more what when into because since after before again back later today tonight night time first last didnt dont doesnt wasnt werent isnt arent cant couldnt wouldnt shouldnt ive youre hes shes theyre were been being have having does doing will would could should might must about there here they them their which while with without your yours ours mine him his her hers its our out over under well good great okay pretty kind sort thing things stuff made make makes making get gets got getting goes going come came coming know knew think thought want wanted need needed say says tell tells asked ask and the for that this from was are but not all any can had has how who why way yes yet one two').split(' ');
+var DZ_STOP_X = ('went said told felt feel feeling feels like just really also then very much even still some more what when into because since after before again back later today tonight night time first last didnt dont doesnt wasnt werent isnt arent cant couldnt wouldnt shouldnt ive youre hes shes theyre were been being have having does doing will would could should might must about there here they them their which while with without your yours ours mine him his her hers its our out over under well good great okay pretty kind sort thing things stuff made make makes making get gets got getting goes going come came coming know knew think thought want wanted need needed say says tell tells asked ask and the for that this from was are but not all any can had has how who why way yes yet one two long short little big same other another every each exactly nothing something anything everything around through across away down took take takes taking happened happen given older newer interesting lot lots ago always never ever maybe probably actually literally overly surely seemed seems wasnt').split(' ');
 function dzSentences(t){ return (String(t || '').replace(/\s+/g, ' ').match(/[^.!?]+[.!?]*/g) || []).map(function(x){ return x.trim(); }).filter(Boolean); }
 function dzSummaryHTML(p){
-  var ents = dzEntriesFor(p.id).filter(function(e){ return String(e.description || '').trim(); }).sort(byDate);
+  var ents = dzAllFor(p.id).filter(function(e){ return String(e.description || '').trim(); }).sort(byDate);
   if(!ents.length) return '<p class="muted dz-sum-empty">Nothing to summarize yet. What you write in the Detailed Description of his entries will be summarized here.</p>';
   var stop = {}; WE_STOP.concat(DZ_STOP_X).forEach(function(w){ stop[w] = 1; });
   [p.ini, p.name].forEach(function(n){ String(n || '').toLowerCase().split(/[^a-z0-9]+/).forEach(function(w){ if(w) stop[w] = 1; }); });
@@ -3313,7 +3379,7 @@ function pageHTML(id){
     case 'community': return head + summaryHTML('community') + todoSection('community') + peopleSection() + cmGroupsHTML() + taskBoard('community');
     case 'dating':
       var dzHidden = isClosed('dating');
-      var dzHead = '<header class="page-head dz-head"><div class="dz-headrow"><div><p class="eyebrow">' + pad(idx) + ' · ' + esc(p.label) + '</p><h1>' + p.h1 + '</h1></div>' + pvBtn('dating', 'everything on the Dating page') + '</div>' +
+      var dzHead = '<header class="page-head dz-head"><div class="dz-headrow"><div><p class="eyebrow">' + pad(idx) + ' · ' + esc(p.label) + '</p><h1>' + p.h1 + '</h1></div><div class="dz-headbtns"><a class="btn sm dzj-open" href="' + esc(dzjUrl()) + '" target="_blank" rel="noopener noreferrer">Open Sugar Plum ↗</a>' + pvBtn('dating', 'everything on the Dating page') + '</div></div>' +
         (dzHidden ? '' : '<p class="sub">' + esc(p.sub) + '</p>') + '</header>';
       return dzHead + (dzHidden ? '<section class="card sec pv-closed dz-hidden"><p class="pv-note">Everything on this page is hidden for privacy. Tap + to show it again.</p></section>' : dzNewSection() + datingBoard());
   }
@@ -3326,7 +3392,9 @@ function renderMenu(){
   var m = document.getElementById('menu-list'); if(!m) return;
   m.innerHTML = '<p class="mi-h">Pages</p>' + PAGES.map(function(p, i){
     return '<a class="mi" href="#' + p.id + '"' + (p.id === cur ? ' aria-current="page"' : '') + '><span class="n">' + pad(i + 1) + '</span>' + pageIcon(p.id) + '<span class="ml">' + esc(p.label) + '</span></a>';
-  }).join('') + '<div class="mi-sep" role="separator"></div><button type="button" class="mi" data-act="settings"><span class="n"></span><span class="mi-gear" aria-hidden="true">⚙︎</span><span class="ml">Backup &amp; sync</span></button>';
+  }).join('') + '<a class="mi" href="' + esc(djUrl()) + '" target="_blank" rel="noopener noreferrer"><span class="n">' + pad(PAGES.length + 1) + '</span>' + DJ_ICO + '<span class="ml">Dreams Journal ↗</span></a>' +
+    '<a class="mi" href="' + esc(dzjUrl()) + '" target="_blank" rel="noopener noreferrer"><span class="n">' + pad(PAGES.length + 2) + '</span>' + catIcon('dating', true) + '<span class="ml">Sugar Plum ↗</span></a>' +
+    '<div class="mi-sep" role="separator"></div><button type="button" class="mi" data-act="settings"><span class="n"></span><span class="mi-gear" aria-hidden="true">⚙︎</span><span class="ml">Backup &amp; sync</span></button>';
 }
 function menuOpen(){ var m = document.getElementById('menu-list'); return !!(m && !m.hidden); }
 function setMenu(open, focusFirst){
@@ -3343,7 +3411,9 @@ function navStuck(){ var nb = document.getElementById('navbar'); if(nb) nb.class
 function renderNav(){
   nav.innerHTML = PAGES.map(function(p, i){
     return '<a href="#' + p.id + '"' + (p.id === cur ? ' aria-current="page"' : '') + '><span class="n">' + pad(i+1) + '</span>' + esc(p.label) + '</a>';
-  }).join('');
+  }).join('') + '<a class="ext" href="' + esc(djUrl()) + '" target="_blank" rel="noopener noreferrer" title="Opens your Dreams Journal"><span class="n">' + pad(PAGES.length + 1) + '</span>Dreams Journal <span aria-hidden="true">↗</span></a>' +
+    '<a class="ext" href="' + esc(dzjUrl()) + '" target="_blank" rel="noopener noreferrer" title="Opens Sugar Plum"><span class="n">' + pad(PAGES.length + 2) + '</span>Sugar Plum <span aria-hidden="true">↗</span></a>';
+  var djt = document.getElementById('dj-top'); if(djt) djt.href = djUrl();
   var a = nav.querySelector('[aria-current]');
   if(a && a.scrollIntoView && nav.scrollWidth > nav.clientWidth){
     var left = a.offsetLeft - (nav.clientWidth - a.offsetWidth) / 2;
@@ -3373,11 +3443,14 @@ function render(){
     if(el && el.tagName) el.value = kv[2];
   });
   cmSyncAdd();
+  afterRender();
   if(k){
     var el = main.querySelector('[data-k="' + (window.CSS && CSS.escape ? CSS.escape(k) : k) + '"]');
     if(el){ try { el.focus({preventScroll:true}); if(sel && el.setSelectionRange) el.setSelectionRange(sel[0], sel[1]); } catch(e){} }
   }
 }
+function afterRender(){}
+function growAny(t){ if(!t) return; t.style.height = 'auto'; t.style.height = t.scrollHeight + 'px'; }
 var mainTimer = null;
 function renderSoon(){ clearTimeout(mainTimer); mainTimer = setTimeout(render, 180); }
 function route(){
@@ -3607,6 +3680,7 @@ function drawItem(){
   dr.setAttribute('data-drawn', D.id);
   var sc2 = dr.querySelector('.d-scroll'); if(sc2 && prevTop) sc2.scrollTop = prevTop;
 }
+function stkHTML(k, cls){ return k === 'star' ? '<svg class="stk stk-star' + (cls ? ' ' + cls : '') + '" viewBox="0 0 24 24" role="img" aria-label="Gold star"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z"/></svg>' : '<span class="stk stk-bang' + (cls ? ' ' + cls : '') + '" role="img" aria-label="!!!">!!!</span>'; }
 function drawDating(it, prevTop){
   var bp = D.fromP && dzPerson(D.fromP);
   var crumb = (bp ? '<button type="button" class="btn sm" data-act="d-backp">‹ ' + esc(bp.ini || 'Back') + '</button>' : D.from ? '<button type="button" class="btn sm" data-act="d-back">‹ ' + fmtShort(D.from) + '</button>' : '') + '<span class="pill c-dating">Dating</span><span>Dating entry</span>';
@@ -3624,7 +3698,8 @@ function drawDating(it, prevTop){
   }
   function plain(a){ return a.map(function(x){ return [x, x]; }); }
   dr.innerHTML = topBar(crumb) + '<div class="d-scroll">' +
-    '<div class="d-titlerow">' + itemIcon(it, 'big') + '<h2 class="dz-title">' + esc(dzTitle(it)) + '</h2></div>' +
+    '<div class="d-titlerow">' + itemIcon(it, 'big') + '<textarea class="d-title dz-mtitle" data-df="title" rows="1" placeholder="' + esc(dzTitle(it)) + '" aria-label="Name this moment">' + esc(it.title || '') + '</textarea></div>' +
+    '<p class="hint dz-mhint">Name this moment, or leave it as ' + esc(dzTitle(it)) + '.</p>' +
     '<dl class="d-fields"><div><dt>Date</dt><dd>' + ddate('date', it.date) + '</dd></div></dl>' +
     sec('Involvement', chips('who', S.dating.people.map(function(p){ return [p.id, p.ini || '?', p.color ? '<span class="dz-dot" style="background:' + p.color + '"></span>' : '']; }))) +
     sec('Overall Scale', scale('overall', 'Rough', 'Amazing'), 'How the interaction went') +
@@ -3637,9 +3712,13 @@ function drawDating(it, prevTop){
       (it.recurring ? dtext('issue', it.issue, 'What keeps happening?') : '')) +
     '<section class="d-sec"><h3>Detailed Description</h3><textarea class="d-desc" data-df="description" placeholder="What happened, what was said, how it felt…" aria-label="Detailed description">' + esc(it.description) + '</textarea></section>' +
     sec('Scale of Likeness', scale('likeness', 'Not feeling it', 'Really into them'), 'How you feel about them right now') +
+    sec('Stickers', '<div class="dz-stks" role="group" aria-label="Stickers">' + DZ_STK.map(function(k){ return '<button type="button" class="dz-stkb" data-act="dz-stk" data-v="' + k[0] + '" aria-pressed="' + ((it.stk || []).indexOf(k[0]) >= 0) + '" aria-label="' + k[1] + '">' + stkHTML(k[0]) + '</button>'; }).join('') + '</div>', 'Shows under the date in Sugar Plum') +
+    '<section class="d-sec dz-lined"><h3>The details <span>Every box is optional</span></h3>' + DZ_DETAILS.map(function(f){ return '<label class="dz-lf"><span>' + esc(f[1]) + '</span><textarea class="dz-lta" data-df="' + f[0] + '" rows="2" placeholder="' + esc(f[2]) + '">' + esc(it[f[0]] || '') + '</textarea></label>'; }).join('') + '</section>' +
+    sec('Reflection', '<label class="dz-check"><input type="checkbox" class="chk" data-df="reflect"' + (it.reflect ? ' checked' : '') + '> This is a reflection, not an interaction</label><p class="hint">Reflections show in his story under their date, but stay off calendars and out of stats and Top 5.</p>') +
     '<div class="d-foot"><button type="button" class="btn danger" data-act="d-del">Delete</button><button type="button" class="btn primary" data-act="close">Done</button></div>' +
   '</div>';
   dr.setAttribute('data-drawn', D.id);
+  setTimeout(function(){ Array.prototype.forEach.call(dr.querySelectorAll('.dz-lta, .dz-mtitle'), growAny); }, 0);
   var sc = dr.querySelector('.d-scroll'); if(sc && prevTop) sc.scrollTop = prevTop;
 }
 function cmSwatches(p){
@@ -3788,7 +3867,7 @@ function drawDPerson(){
     '<p class="hint">Totals count your entries marked Date, Gifts Given and Gifts Received (' + n + (n === 1 ? ' entry' : ' entries') + ' so far). Add any from before you started logging.</p>' +
     '<section class="d-sec"><h3>Notes</h3>' + area('notes', 'How you met, things to remember…', 'Notes') + '</section>' +
     '<section class="d-sec dz-sumsec"><h3>Summary</h3>' + dzSummaryHTML(p) + '</section>' +
-    '<section class="d-sec dz-entsec"><h3>All Entries <span>' + n + '</span></h3>' + dzEntryListHTML(p) + '</section>' +
+    (JOURNAL && !misc ? jProfileStoryLink(p) : '<section class="d-sec dz-entsec"><h3>All Entries <span>' + n + '</span></h3>' + dzEntryListHTML(p) + '</section>') +
     '<div class="d-foot"><button type="button" class="btn danger" data-act="dz-pdel">Delete</button><button type="button" class="btn primary" data-act="close">Done</button></div></div>';
 }
 
@@ -3882,6 +3961,9 @@ function drawSettings(){
         '<li>Save the file to iCloud Drive (or AirDrop or email it to yourself).</li>' +
         '<li>On the other device, open the planner, tap <b>Backup</b>, then <b>Restore from backup</b> and pick the file.</li></ol>' +
         '<p class="hint">Restoring replaces what is on that device, so always restore from your newest backup.</p></section>' +
+      XLINKS.map(function(L, i){ return '<section class="d-sec"><h3>' + esc(L.name) + '</h3><p>The <b>' + esc(L.name) + ' ↗</b> link opens it in its own tab. If you named its repo something other than <b>' + esc(L.repo) + '</b>, paste its address here.</p>' +
+        '<label class="af"><span>' + esc(L.name) + ' address</span><input type="url" class="ctl" data-xlink="' + i + '"' + (i === 0 ? ' id="dj-url"' : '') + ' inputmode="url" autocomplete="off" spellcheck="false" value="' + esc(xUrl(L)) + '" placeholder="' + esc(L.def) + '"></label>' +
+        '<p class="hint" id="' + (i === 0 ? 'dj-msg' : 'xl-msg-' + i) + '"></p></section>'; }).join('') +
       '<section class="d-sec"><h3>Reminders</h3><p>Reminders show at the top of every page on their date. To get a real alert on your phone, open the item and tap <b>Add to my calendar</b>.</p></section>' +
       (standalone ? '' : '<section class="d-sec"><h3>Install on iPhone or iPad</h3><p>Open the planner’s web address in Safari, tap the Share button, then <b>Add to Home Screen</b>. After that it opens like an app and works with no internet.</p></section>') +
       '<section class="d-sec"><h3>Start fresh</h3><p>Erase every entry on this device and go back to an empty planner. Your Dating people and Packing List categories go back to the starting set. This can’t be undone.' + (SYS.on ? ' <b>Sync is on, so this also erases your other devices.</b>' : '') + '</p>' +
@@ -4046,6 +4128,10 @@ document.addEventListener('click', function(e){
       var dsf = t.getAttribute('data-f'), dsv = t.getAttribute('data-v');
       setField(dsi, dsf, String(dsi[dsf]) === dsv ? '' : dsv); save(); drawItem(); renderSoon(); break;
     case 'dz-person': D = {mode:'dperson', id:t.getAttribute('data-pid')}; drawDPerson(); showDrawer(); break;
+    case 'dz-stk':
+      var dki = getItem(D.id); if(!dki) break;
+      var dkv = t.getAttribute('data-v'), dka = (dki.stk || []).slice(), dkx = dka.indexOf(dkv); if(dkx >= 0) dka.splice(dkx, 1); else dka.push(dkv);
+      setField(dki, 'stk', dka); save(); drawItem(); renderSoon(); break;
     case 'dz-pdel':
       armed(t, function(){ var dpid = D.id; S.dating.people = S.dating.people.filter(function(p){ return p.id !== dpid; });
         S.items.forEach(function(i){ if(i.kind === 'dentry' && Array.isArray(i.who)) i.who = i.who.filter(function(x){ return x !== dpid; }); });
@@ -4182,7 +4268,7 @@ document.addEventListener('input', function(e){
     var it = getItem(D.id); if(!it) return;
     if(el.type === 'checkbox' || el.tagName === 'SELECT') return;
     setField(it, el.getAttribute('data-df'), el.value); save();
-    if(el.classList.contains('d-title')) grow(el);
+    if(el.classList.contains('d-title') || el.classList.contains('dz-lta')) grow(el);
     renderSoon(); return;
   }
   if(el.hasAttribute('data-subf') && el.getAttribute('data-subf') === 'text'){
@@ -4204,6 +4290,17 @@ document.addEventListener('input', function(e){
 document.addEventListener('change', function(e){
   var el = e.target;
   if(el === importInput) return;
+  if(el.hasAttribute('data-xlink')){
+    var XL = XLINKS[+el.getAttribute('data-xlink')], du = el.value.trim(), dm = document.getElementById(el.getAttribute('data-xlink') === '0' ? 'dj-msg' : 'xl-msg-' + el.getAttribute('data-xlink'));
+    if(!XL) return;
+    if(du && !/^https?:\/\//i.test(du)) du = 'https://' + du;
+    du = du.replace(/^http:/i, 'https:');
+    if(!du || du === XL.def){ try { localStorage.removeItem(XL.key); } catch(e){} el.value = XL.def; }
+    else if(/^https:\/\/[^\s\/]+\.[^\s]+$/.test(du)){ try { localStorage.setItem(XL.key, du); } catch(e){} el.value = du; }
+    else { if(dm){ dm.className = 'hint err'; dm.textContent = 'That doesn’t look like a web address. It should look like ' + XL.def; } return; }
+    if(dm){ dm.className = 'hint ok'; dm.textContent = 'Saved. The ' + XL.name + ' link now opens ' + el.value; }
+    renderNav(); if(typeof jTopLinks === 'function') jTopLinks(); return;
+  }
   if(el.hasAttribute('data-prf')){ prSetLast(el.getAttribute('data-prf'), el.value); render(); return; }
   if(el.getAttribute('data-dpf') === 'color' && D.mode === 'dperson'){ drawDPerson(); render(); return; }
   if(el.hasAttribute('data-pcf') && el.getAttribute('data-pcf') !== 'notes'){
@@ -4464,7 +4561,7 @@ function dzMoveBy(pid, dir){
 /* ---------- sync across devices: encrypted file in the user's own GitHub account ---------- */
 var SY_KEY = 'personalPlanner.sync.v1', SY_FILE = 'personal-planner-sync.json', SY_API = 'https://api.github.com';
 var SY_TOKEN_URL = 'https://github.com/settings/tokens/new?scopes=gist&description=Personal%20Planner%20sync';
-var SY_SECS = ['habits','habitLog','days','content','packing','dating','period','vitals'], SY_ITER = 210000;
+var SY_SECS = ['habits','habitLog','days','content','packing','dating','period','vitals','dzBacklog'], SY_ITER = 210000;
 var SYS = syLoad(), SY_STATE = 'ok', SY_BUSY = false, SY_AGAIN = false, SY_TIMER = null, SY_QUIET = false;
 var SY_FORM = syBlankForm();
 function syBlankForm(){ return {token:'', pass:'', pass2:'', step:'', show:false, msg:'', bad:false, busy:false}; }
@@ -4473,7 +4570,8 @@ function sySave(){ try { if(SYS.on) localStorage.setItem(SY_KEY, JSON.stringify(
 function syDevice(){ var u = navigator.userAgent || ''; if(/iPad/.test(u) || (/Macintosh/.test(u) && navigator.maxTouchPoints > 1)) return 'iPad'; if(/iPhone/.test(u)) return 'iPhone'; if(/Android/.test(u)) return 'Android'; if(/Mac/.test(u)) return 'Mac'; if(/Windows/.test(u)) return 'PC'; return 'computer'; }
 function h32(str){ var h = 0x811c9dc5; for(var i = 0; i < str.length; i++){ h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); } return (h >>> 0).toString(36); }
 function syJ(v){ return JSON.stringify(v == null ? null : v); }
-var APP_V = 23;
+/* v24: Dating Journal fields (entry titles, stickers, reflections, details, In my words) and the notes backlog */
+var APP_V = 24;
 /* older planners only understand check-ins stored inside each person, so every person also carries a copy of theirs */
 function cmMirror(pid, items){
   return items.filter(function(i){ return i.kind === 'checkin' && i.pid === pid && validISO(i.date); })
@@ -4493,7 +4591,7 @@ function syChanged(pl, base){
 }
 function syHasData(st){
   var pk = 0; Object.keys((st.packing && st.packing.lists) || {}).forEach(function(k){ pk += (st.packing.lists[k] || []).length; });
-  return st.items.length + st.habits.length + Object.keys(st.days || {}).length + pk > 0;
+  return st.items.length + st.habits.length + Object.keys(st.days || {}).length + pk + ((st.dzBacklog && st.dzBacklog.items) || []).length > 0;
 }
 function syClone(v){ return JSON.parse(JSON.stringify(v == null ? null : v)); }
 function syUnionById(L, R){ var out = syClone(R) || [], at = {}; out.forEach(function(x, i){ at[x.id] = i; }); (L || []).forEach(function(x){ if(at[x.id] != null) out[at[x.id]] = syClone(x); else out.push(syClone(x)); }); return out; }
@@ -4504,6 +4602,11 @@ function syMergeSec(k, L, R){
   if(k === 'vitals') return syUnionById(L || [], R || []);
   if(k === 'period'){ var pr = syClone(L) || prDefault(); pr.cycles = syUnionById((L && L.cycles) || [], (R && R.cycles) || []); return pr; }
   if(k === 'dating'){ var d = syClone(R) || {people:[]}; d.people = syUnionById((L && L.people) || [], d.people || []); return d; }
+  if(k === 'dzBacklog'){
+    var bo = {items:[], done:Object.assign({}, (R && R.done) || {}, (L && L.done) || {})}, at = {};
+    ((R && R.items) || []).concat((L && L.items) || []).forEach(function(x){ if(!x || bo.done[x.id]) return; var i = at[x.id]; if(i == null){ at[x.id] = bo.items.length; bo.items.push(syClone(x)); } else if((x.updated || 0) >= (bo.items[i].updated || 0)) bo.items[i] = syClone(x); });
+    return bo;
+  }
   if(k === 'packing'){
     var o = syClone(R), l = L || {cats:[], lists:{}};
     (l.cats || []).forEach(function(c){
@@ -4846,6 +4949,7 @@ if(/^https?:$/.test(location.protocol)){
 }
 
 window.__planner = {get state(){ return S; }, render:render, flush:flush, sky:sky, moonLon:moonLon, sunLon:sunLon, parseContent:parseContent, refreshWeather:refreshWeather, wx:function(){ return WX; }};
+
 setSync(storageOK ? 'ok' : 'off');
 route();
 refreshWeather();
